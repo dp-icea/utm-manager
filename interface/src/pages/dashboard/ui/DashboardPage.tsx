@@ -15,7 +15,6 @@ export const DashboardPage = () => {
             <div className="flex-1 relative">
               <MapViewer />
             </div>
-            <TimelineBar />
           </main>
         </div>
       </div>
