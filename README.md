@@ -1,18 +1,26 @@
-# BR-UTM Interface
+# UTM Manager
 
-A comprehensive UTM (Unmanned Traffic Management) observation system built with FastAPI backend and React frontend, featuring real-time airspace monitoring and constraint management capabilities.
+A specialized UTM management system for drone operations built with FastAPI backend and React frontend, designed for Formula 1 Brazil 2025 testing with 6 preset operational zones and real-time airspace monitoring capabilities.
 
 ## Live Demo
 
-https://github.com/user-attachments/assets/ef64030b-09e9-4289-8840-a1bcb1872276
+TODO
 
 ## Screenshot
 
-![Demo Screenshot](assets/demo2.png)
+TODO
 
 ## Overview
 
-BR-UTM Interface provides a web-based interface for monitoring and managing unmanned aircraft systems (UAS) operations within Brazilian airspace. The system offers real-time visualization using Cesium 3D globe technology and robust backend APIs for airspace and constraint management.
+UTM Manager provides a specialized web-based interface for managing drone flight strips and operations during the Formula 1 Brazil 2025 testing event. The system features 6 preset operational zones designed for coordinated drone activities, real-time flight strip tracking using Cesium 3D visualization, and comprehensive APIs for flight strip lifecycle management.
+
+### Key Features
+
+- **6 Preset Operational Zones**: Pre-configured zones specifically designed for F1 Brazil 2025 testing
+- **Flight Strip Management**: Create, update, and track flight strips throughout their lifecycle
+- **Real-time Monitoring**: Live visualization of drone operations and flight strip status
+- **Zone-based Operations**: Coordinate activities across designated operational areas
+- **Conflict Detection**: Identify and manage potential conflicts between flight operations
 
 ## Architecture
 
@@ -20,6 +28,22 @@ BR-UTM Interface provides a web-based interface for monitoring and managing unma
 - **Frontend**: React + TypeScript with Vite, featuring Cesium for 3D visualization
 - **Deployment**: Docker containerized with nginx reverse proxy
 - **Database**: MongoDB integration via Motor async driver
+
+## F1 Brazil 2025 Configuration
+
+This system is specifically configured for the Formula 1 Brazil 2025 testing event with the following operational setup:
+
+### Operational Zones
+- **Zone 1-6**: Pre-configured operational areas around the circuit
+- **Zone Boundaries**: Defined coordinates and altitude restrictions
+- **Zone Status**: Real-time monitoring of zone availability and conflicts
+- **Zone Coordination**: Cross-zone operation management and handoffs
+
+### Flight Strip Workflow
+1. **Strip Creation**: Define flight parameters and assign to operational zone
+2. **Pre-flight Validation**: Automated conflict checking and zone availability
+3. **Active Monitoring**: Real-time tracking during flight operations
+4. **Post-flight Processing**: Operation completion and data archival
 
 ## Quick Start
 
@@ -80,8 +104,11 @@ Once running, access the interactive API documentation at:
 
 ### Main Endpoints
 
+- `/api/flight-strips` - Flight strip lifecycle management
+- `/api/zones` - Operational zone configuration and status
+- `/api/operations` - Drone operation tracking and coordination
+- `/api/conflicts` - Conflict detection and resolution
 - `/api/airspace` - Airspace management operations
-- `/api/constraints` - Constraint and restriction handling
 - `/api/healthy` - System health checks
 
 ## Project Structure
@@ -89,15 +116,18 @@ Once running, access the interactive API documentation at:
 ```
 ├── backend/                 # FastAPI backend
 │   ├── adapters/           # External service adapters
-│   ├── application/        # Application services
-│   ├── domain/            # Domain models and logic
+│   ├── application/        # Application services (flight strips, zones)
+│   ├── domain/            # Domain models (flight strips, operations, zones)
 │   ├── infrastructure/    # Infrastructure components
 │   ├── ports/             # Interface definitions
 │   ├── routes/            # API route handlers
-│   ├── schemas/           # Pydantic models
+│   ├── schemas/           # Pydantic models (flight strip schemas)
 │   └── services/          # Business logic services
 ├── interface/             # React frontend
 │   ├── src/              # Source code
+│   │   ├── components/   # Flight strip components
+│   │   ├── zones/        # Zone management interface
+│   │   └── operations/   # Operation tracking views
 │   ├── public/           # Static assets
 │   └── dist/             # Build output
 ├── docs/                 # Documentation
@@ -117,10 +147,10 @@ Once running, access the interactive API documentation at:
 - **React 19** - UI framework
 - **TypeScript** - Type safety
 - **Vite** - Build tool and dev server
-- **Cesium** - 3D globe and mapping
+- **Cesium** - 3D globe and mapping for zone visualization
 - **Tailwind CSS** - Styling framework
-- **Radix UI** - Component primitives
-- **React Query** - Data fetching and caching
+- **Radix UI** - Component primitives for flight strip UI
+- **React Query** - Data fetching and real-time updates
 
 ## Development Guidelines
 

@@ -100,6 +100,19 @@
     --muted-foreground: 215 20.2% 65.1%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
+
+    /* Flight area colors */
+    --flight-red: 0 84% 60%;
+    --flight-yellow: 48 96% 53%;
+    --flight-orange: 24 95% 53%;
+    --flight-green: 142 76% 36%;
+    --flight-blue: 221 83% 53%;
+    --flight-purple: 271 81% 56%;
+
+    /* ATC specific colors */
+    --atc-header: 222 39% 12%;
+    --atc-sidebar: 222 39% 13%;
+    --atc-strip: 217 33% 18%;
   }
 }
 

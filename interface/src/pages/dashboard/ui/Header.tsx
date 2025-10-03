@@ -1,44 +1,19 @@
 import { Wifi, WifiOff, AlertCircle, Loader2, Radio } from "lucide-react";
-import { Button } from "@/shared/ui/button";
+import { useNavigate } from "react-router-dom";
 import IconBRUTM from "@/shared/assets/logo.svg";
-import { useMap } from "@/shared/lib/map";
-import { MapState } from "@/shared/model";
+import { ROUTES } from "@/shared/config";
+import { useAuth } from "@/shared/lib/hook";
+import { Box, Button, Typography, AppBar, Toolbar } from "@mui/material";
+
+import LogoutIcon from "@mui/icons-material/Logout";
 
 export const Header = () => {
-  const { loading, mapState, isLive, setIsLive } = useMap();
+  const { logout } = useAuth();
+  const navigate = useNavigate();
 
-  const getConnectionIcon = () => {
-    switch (mapState) {
-      case MapState.ONLINE:
-        return <Wifi className="h-4 w-4 text-green-500" />;
-      case MapState.ERROR:
-        return <AlertCircle className="h-4 w-4 text-red-500" />;
-      case MapState.LOADING:
-        return <Loader2 className="h-4 w-4 text-yellow-500 animate-spin" />;
-      case MapState.OFFLINE:
-        return <WifiOff className="h-4 w-4 text-gray-500" />;
-      default:
-        return <Wifi className="h-4 w-4 text-gray-500" />;
-    }
-  };
-
-  const getConnectionText = () => {
-    switch (mapState) {
-      case MapState.ONLINE:
-        return "Online";
-      case MapState.ERROR:
-        return "Error";
-      case MapState.LOADING:
-        return "Connecting...";
-      case MapState.OFFLINE:
-        return "Offline";
-      default:
-        return "Unknown";
-    }
-  };
-
-  const getLoadingColor = () => {
-    return loading ? "bg-green-300" : "bg-green-500";
+  const handleLogout = () => {
+    logout();
+    navigate(ROUTES.LOGIN);
   };
 
   return (
@@ -52,40 +27,20 @@ export const Header = () => {
           />
           <div className="flex flex-col items-start">
             <p className="text-xl font-bold text-white">BR-UTM</p>
-            <p className="text-sm text-gray-300">
-              Real-time UTM Tracking System
-            </p>
+            <p className="text-sm text-gray-300">UTM Traffic Control System</p>
           </div>
         </div>
       </div>
 
       <div className="flex items-center space-x-4">
-        {/* System Status */}
-        <div className="flex items-center space-x-2">
-          <div className="flex items-center space-x-1">
-            {getConnectionIcon()}
-            <span className="text-sm text-gray-300 ml-4">
-              {getConnectionText()}
-            </span>
-          </div>
-        </div>
-
-        {/* Live Button */}
         <Button
-          variant="ghost"
-          onClick={() => setIsLive(!isLive)}
-          className="flex items-center"
+          variant="text"
+          startIcon={<LogoutIcon />}
+          onClick={handleLogout}
+          color="inherit"
         >
-          <Radio
-            className={`h-4 w-4 ${isLive ? "text-green-500" : "text-gray-400"}`}
-          />
-          <span className="text-sm font-normal text-gray-300 hover:text-gray-100">
-            Live
-          </span>
+          Logout
         </Button>
-
-        {/* Loading Indication Simbol */}
-        <div className={`w-2 h-2 rounded-full ${getLoadingColor()}`} />
       </div>
     </header>
   );
