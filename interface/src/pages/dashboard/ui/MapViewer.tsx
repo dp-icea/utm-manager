@@ -20,7 +20,7 @@ export class MapViewer extends Component {
         <Viewer
           terrain={Terrain.fromWorldTerrain()}
           selectionIndicator={false}
-          infoBox={true}
+          infoBox={false}
           animation={false}
           timeline={false}
           homeButton={false}

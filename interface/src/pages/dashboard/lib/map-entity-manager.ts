@@ -1,8 +1,6 @@
 import { Cartesian3 } from "cesium";
 import * as Cesium from "cesium";
-import {
-  OperationalIntentStateColor,
-} from "@/shared/model";
+import { OperationalIntentStateColor } from "@/shared/model";
 import type {
   OperationalIntent,
   Constraint,
@@ -12,6 +10,7 @@ import type {
   Volume3D,
   Volume4D,
 } from "@/shared/model";
+import { formatEntityDetails } from "@/shared/lib/formatters";
 import {
   isConstraint,
   isIdentificationServiceArea,
@@ -34,43 +33,89 @@ interface DisplayedEntity {
   entityIds: RegionId[];
 }
 
+interface GeoJson {
+  type: "FeatureCollection";
+  features: Array<{
+    type: "Feature";
+    properties: {
+      name?: string;
+      color?: string;
+      height?: number;
+      [key: string]: any;
+    };
+    geometry: {
+      type: "Polygon";
+      coordinates: number[][][];
+    };
+  }>;
+}
+
 export class MapEntityManager {
   private viewer: Cesium.Viewer;
   private displayedEntities: Record<RegionId, DisplayedEntity> = {};
   private handler: Cesium.ScreenSpaceEventHandler;
   private flights: Record<string, Cesium.Entity[]> = {};
+  private geoJsonData: GeoJson | null = null;
+  private geoJsonEntities: Cesium.Entity[] = [];
+  private multiRegionSelector: boolean = false;
 
   constructor(viewer: Cesium.Viewer) {
     this.viewer = viewer;
 
     this.viewer.cesiumWidget.creditContainer.remove();
 
-    navigator.geolocation.getCurrentPosition(
-      (position: GeolocationPosition) => {
-        const { latitude, longitude, altitude } = position.coords;
+    const [latitude, longitude] = [-23.713416, -46.693356];
+    const cameraAltitude = 5000;
 
-        const cameraAltitude = altitude ? altitude + 1000 : 2000;
-
-        this.viewer.camera.setView({
-          destination: Cartesian3.fromDegrees(
-            longitude,
-            latitude,
-            cameraAltitude,
-          ),
-          orientation: {
-            heading: Cesium.Math.toRadians(0),
-            pitch: Cesium.Math.toRadians(-45),
-            roll: 0,
-          },
-        });
+    this.viewer.camera.setView({
+      destination: Cartesian3.fromDegrees(longitude, latitude, cameraAltitude),
+      orientation: {
+        heading: Cesium.Math.toRadians(0),
+        pitch: Cesium.Math.toRadians(-70),
+        roll: 0,
       },
-    );
+    });
 
     this.handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
+
+    this.loadGeoJsonZones();
+
+    this.addGeojsonEntityClickCallback((pickedEntity: Cesium.Entity) => {
+      console.log(`Clicked on GeoJSON entity: ${pickedEntity.id}`);
+      this.viewer.entities.remove(pickedEntity);
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key == "Control") {
+        this.multiRegionSelector = true;
+      }
+    });
+
+    document.addEventListener("keyup", (event) => {
+      if (event.key == "Control") {
+        this.multiRegionSelector = false;
+      }
+    });
   }
 
   addMoveEndCallback(callback: () => void) {
     this.viewer.camera.moveEnd.addEventListener(callback);
+  }
+
+  addGeojsonEntityClickCallback(callback: (entity: Cesium.Entity) => void) {
+    console.log("Handler", this.handler);
+    this.handler.setInputAction(
+      (event: Cesium.ScreenSpaceEventHandler.PositionedEvent) => {
+        const pickedObject = this.viewer.scene.pick(event.position);
+        if (Cesium.defined(pickedObject) && Cesium.defined(pickedObject.id)) {
+          const pickedEntity = pickedObject.id as Cesium.Entity;
+          if (this.geoJsonEntities.some((e) => e.id === pickedEntity.id)) {
+            callback(pickedEntity);
+          }
+        }
+      },
+      Cesium.ScreenSpaceEventType.LEFT_CLICK,
+    );
   }
 
   addEntityClickCallback(
@@ -205,6 +250,77 @@ export class MapEntityManager {
     });
   }
 
+  async loadGeoJsonZones() {
+    try {
+      const response = await fetch("/zones.geojson");
+      if (!response.ok) {
+        throw new Error(`Failed to load GeoJSON: ${response.statusText}`);
+      }
+
+      this.geoJsonData = await response.json();
+      this.displayGeoJsonPolygons(this.geoJsonData);
+      console.log(this.geoJsonEntities);
+    } catch (error) {
+      console.error("Error loading GeoJSON zones:", error);
+    }
+  }
+
+  clearGeoJsonZones() {
+    this.geoJsonEntities.forEach((entity) => {
+      this.viewer.entities.removeById(entity.id);
+    });
+    this.geoJsonEntities = [];
+  }
+
+  private displayGeoJsonPolygons(geoJsonData: any) {
+    // Clear existing GeoJSON entities
+    this.clearGeoJsonZones();
+
+    if (!geoJsonData.features || !Array.isArray(geoJsonData.features)) {
+      console.warn("Invalid GeoJSON format: no features array found");
+      return;
+    }
+
+    geoJsonData.features.forEach((feature: any, index: number) => {
+      if (feature.geometry?.type !== "Polygon") {
+        return; // Skip non-polygon features
+      }
+
+      const coordinates = feature.geometry.coordinates[0]; // Get outer ring
+      const colorProperty = feature.properties?.color || "#808080"; // Default to gray
+
+      // Convert hex color to Cesium Color
+      let cesiumColor: Cesium.Color;
+      try {
+        cesiumColor = Cesium.Color.fromCssColorString(colorProperty);
+      } catch (error) {
+        console.warn(
+          `Invalid color "${colorProperty}" for feature ${index}, using gray`,
+        );
+        cesiumColor = Cesium.Color.GRAY;
+      }
+
+      // Convert GeoJSON coordinates to Cesium Cartesian3
+      const positions = coordinates.map((coord: number[]) =>
+        Cesium.Cartesian3.fromDegrees(coord[0], coord[1], 0),
+      );
+
+      const entity = this.viewer.entities.add({
+        id: feature.properties?.name || index,
+        polygon: {
+          hierarchy: new Cesium.PolygonHierarchy(positions),
+          material: cesiumColor.withAlpha(0.3),
+          outline: true,
+          outlineColor: cesiumColor,
+          height: 750,
+          extrudedHeight: 750 + (feature.properties?.height || 100), // Default height or from properties
+        },
+      });
+
+      this.geoJsonEntities.push(entity);
+    });
+  }
+
   displayRegions(
     regions: Array<
       Constraint | OperationalIntent | IdentificationServiceAreaFull
@@ -218,7 +334,7 @@ export class MapEntityManager {
           (entity) => entity.entityIds.length,
         ),
       ) +
-      Object.values(this.flights).flat().length
+        Object.values(this.flights).flat().length
     ) {
       this.viewer.entities.removeAll();
       this.displayedEntities = {};

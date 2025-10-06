@@ -164,10 +164,10 @@ export const MapDataService = () => {
       const fetchedVolumes: Array<
         OperationalIntent | Constraint | IdentificationServiceAreaFull
       > = [
-          ...res.constraints,
-          ...res.operational_intents,
-          ...res.identification_service_areas,
-        ];
+        ...res.constraints,
+        ...res.operational_intents,
+        ...res.identification_service_areas,
+      ];
 
       localVolumes.current = fetchedVolumes.slice();
       setVolumes(fetchedVolumes);
@@ -292,17 +292,23 @@ export const MapDataService = () => {
       }, VOLUME_FETCH_INTERVAL);
     });
 
-    controller.current.addEntityClickCallback(
-      (pickedEntity: Cesium.Entity, regionId: string) => {
-        const volume = localVolumes.current.find(
-          (v) => v.reference.id === regionId,
-        );
-
-        if (volume) {
-          pickedEntity.description = formatEntityDetails(volume);
-        }
+    controller.current.addGeojsonEntityClickCallback(
+      (pickedEntity: Cesium.Entity) => {
+        console.log(`Clicked on GeoJSON entity: ${pickedEntity.id}`);
       },
     );
+
+    // controller.current.addEntityClickCallback(
+    //   (pickedEntity: Cesium.Entity, regionId: string) => {
+    //     const volume = localVolumes.current.find(
+    //       (v) => v.reference.id === regionId,
+    //     );
+    //
+    //     if (volume) {
+    //       pickedEntity.description = formatEntityDetails(volume);
+    //     }
+    //   },
+    // );
 
     if (constantVolumeFetch.current) {
       clearInterval(constantVolumeFetch.current);
