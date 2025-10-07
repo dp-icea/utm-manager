@@ -5,7 +5,7 @@
       "type": "Feature",
       "properties": {
         "color": "#f44336",
-        "name": "VERMELHA"
+        "name": "red"
       },
       "geometry": {
         "type": "Polygon",
@@ -31,7 +31,7 @@
       "type": "Feature",
       "properties": {
         "color": "#9c27b0",
-        "name": "LILÁS"
+        "name": "purple"
       },
       "geometry": {
         "type": "Polygon",
@@ -52,7 +52,7 @@
       "type": "Feature",
       "properties": {
         "color": "#ff9800",
-        "name": "LARANJA"
+        "name": "orange"
       },
       "geometry": {
         "type": "Polygon",
@@ -73,7 +73,7 @@
       "type": "Feature",
       "properties": {
         "color": "#4caf50",
-        "name": "VERDE"
+        "name": "green"
       },
       "geometry": {
         "type": "Polygon",
@@ -96,7 +96,7 @@
       "type": "Feature",
       "properties": {
         "color": "#ffeb3b",
-        "name": "AMARELA"
+        "name": "yellow"
       },
       "geometry": {
         "type": "Polygon",
@@ -121,7 +121,7 @@
       "type": "Feature",
       "properties": {
         "color": "#00bcd4",
-        "name": "AZUL"
+        "name": "blue"
       },
       "geometry": {
         "type": "Polygon",

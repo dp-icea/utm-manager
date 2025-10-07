@@ -11,15 +11,7 @@ import {
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import type { FlightArea, FlightStrip } from "@/shared/model";
 import dayjs, { Dayjs } from "dayjs";
-
-const FLIGHT_AREAS: FlightArea[] = [
-  "Red",
-  "Yellow",
-  "Orange",
-  "Green",
-  "Blue",
-  "Purple",
-];
+import { FLIGHT_AREAS } from "@/shared/model";
 
 interface AddFlightStripFormProps {
   onAdd: (strip: FlightStrip) => void;

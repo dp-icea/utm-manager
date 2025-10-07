@@ -1,3 +1,4 @@
+import * as Cesium from "cesium";
 import { useRef, useEffect } from "react";
 import { useCesium } from "resium";
 import { addSeconds, format } from "date-fns";
@@ -9,10 +10,12 @@ import type {
   Rectangle,
   Volume4D,
   Flight,
+  FlightArea,
 } from "@/shared/model";
 import { MapState } from "@/shared/model";
 import { MapEntityManager } from "./map-entity-manager";
 import { useMap } from "@/shared/lib/map";
+import { useStrips } from "@/shared/lib/strips";
 import { FlightsService, AllocationsService } from "@/shared/api";
 import { toast } from "@/shared/lib/hook";
 import { formatEntityDetails } from "@/shared/lib/formatters";
@@ -76,6 +79,8 @@ export const MapDataService = () => {
     flightsFilter,
     flightProvidersFilter,
   } = useMap();
+
+  const { activeStripIds, setActiveStripIds } = useStrips();
 
   const getTimeRange: () => TimeRange = () => {
     const startDateTime = new Date(
@@ -279,6 +284,8 @@ export const MapDataService = () => {
   const onViewerStart: React.EffectCallback = () => {
     if (!viewer || controller.current) return;
 
+    console.log("=== On Viewer Start");
+
     controller.current = new MapEntityManager(viewer);
 
     timeRange.current = getTimeRange();
@@ -292,30 +299,22 @@ export const MapDataService = () => {
       }, VOLUME_FETCH_INTERVAL);
     });
 
-    controller.current.addGeojsonEntityClickCallback(
-      (pickedEntity: Cesium.Entity) => {
-        console.log(`Clicked on GeoJSON entity: ${pickedEntity.id}`);
-      },
-    );
-
-    // controller.current.addEntityClickCallback(
-    //   (pickedEntity: Cesium.Entity, regionId: string) => {
-    //     const volume = localVolumes.current.find(
-    //       (v) => v.reference.id === regionId,
-    //     );
-    //
-    //     if (volume) {
-    //       pickedEntity.description = formatEntityDetails(volume);
-    //     }
-    //   },
-    // );
-
     if (constantVolumeFetch.current) {
       clearInterval(constantVolumeFetch.current);
     }
     constantVolumeFetch.current = setInterval(() => {
       triggerFetchVolumes();
     }, VOLUME_FETCH_INTERVAL);
+
+    controller.current.addSelectedEntitiesChangeCallback(
+      (entities: Set<Cesium.Entity>) => {
+        setActiveStripIds(
+          entities.size
+            ? Array.from(entities).map((e) => e.id as FlightArea)
+            : [],
+        );
+      },
+    );
   };
 
   const onTimeRangeChange: React.EffectCallback = () => {
@@ -401,7 +400,14 @@ export const MapDataService = () => {
     }
   };
 
+  const onActiveStripsChange: React.EffectCallback = () => {
+    if (!controller.current) return;
+
+    controller.current.updateSelectedEntities(activeStripIds);
+  };
+
   // Object state on the dynamic input
+  useEffect(onActiveStripsChange, [activeStripIds]);
   useEffect(onViewerStart, [viewer]);
   useEffect(onTimeRangeChange, [startDate, startTime, endDate, endTime]);
   useEffect(onInterfaceUpdate, [

@@ -1,6 +1,10 @@
+import type { FlightArea } from "@/shared/model";
 import { createContext } from "react";
 
-export interface IStripsContext {}
+export interface IStripsContext {
+  activeStripIds: FlightArea[];
+  setActiveStripIds: (ids: FlightArea[]) => void;
+}
 
 export const StripsContext = createContext<IStripsContext | undefined>(
   undefined,
