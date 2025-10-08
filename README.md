@@ -30,7 +30,6 @@ When authorities such as police officers, firefighters, or other authorized pers
 - **Backend**: FastAPI-based REST API with clean architecture principles
 - **Frontend**: React + TypeScript with Vite, featuring Cesium for 3D visualization
 - **Deployment**: Docker containerized with nginx reverse proxy
-- **Database**: MongoDB integration via Motor async driver
 
 ## F1 Event Airspace Zone Configuration
 
