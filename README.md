@@ -9,6 +9,8 @@ A specialized airspace management interface developed as part of the BR-UTM (Bra
 
 ### Video Demo
 
+[Screencast from 08-10-2025 16:22:45.webm](https://github.com/user-attachments/assets/6fde223d-35b0-4612-85aa-71f77e7ed95b)
+
 ## Overview
 
 This module is part of the larger BR-UTM (Brazilian Unmanned Traffic Management) project, which encompasses multiple systems and components for comprehensive drone airspace management across Brazil. This specific component focuses on the Formula 1 Event in Brazil 2025, where the Brazilian Airspace Department has divided the zones near the F1 track into 6 distinct operational areas: Red, Orange, Green, Purple, Blue, and Yellow zones.
