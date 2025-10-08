@@ -30,6 +30,7 @@ export class MapViewer extends Component {
           sceneModePicker={false}
           baseLayerPicker={false}
           style={{ width: "100%", height: "100%" }}
+          geocoder={false}
           imageryProvider={false}
         >
           <MapDataService />
