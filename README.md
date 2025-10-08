@@ -1,26 +1,27 @@
-# UTM Manager
+# UTM Manager - Airspace Control Module
 
-A specialized UTM management system for drone operations built with FastAPI backend and React frontend, designed for Formula 1 Brazil 2025 testing with 6 preset operational zones and real-time airspace monitoring capabilities.
+A specialized airspace management interface developed as part of the BR-UTM (Brazilian Unmanned Traffic Management) project. This module specifically handles drone operations during the Formula 1 Event in Brazil 2025, managing airspace control across 6 designated zones around the F1 track with real-time flight strip management and 3D visualization capabilities.
 
-## Live Demo
+## Demo
 
-TODO
+### Screenshots
+![Demo Screenshot](assets/demo.png)
 
-## Screenshot
-
-TODO
+### Video Demo
 
 ## Overview
 
-UTM Manager provides a specialized web-based interface for managing drone flight strips and operations during the Formula 1 Brazil 2025 testing event. The system features 6 preset operational zones designed for coordinated drone activities, real-time flight strip tracking using Cesium 3D visualization, and comprehensive APIs for flight strip lifecycle management.
+This module is part of the larger BR-UTM (Brazilian Unmanned Traffic Management) project, which encompasses multiple systems and components for comprehensive drone airspace management across Brazil. This specific component focuses on the Formula 1 Event in Brazil 2025, where the Brazilian Airspace Department has divided the zones near the F1 track into 6 distinct operational areas: Red, Orange, Green, Purple, Blue, and Yellow zones.
 
-### Key Features
+When authorities such as police officers, firefighters, or other authorized personnel need to operate drones in the region, an Airspace Traffic Controller records flight information on strips, documenting which zone is occupied, by whom, at what altitude, departure/arrival times, and aircraft identification.
 
-- **6 Preset Operational Zones**: Pre-configured zones specifically designed for F1 Brazil 2025 testing
-- **Flight Strip Management**: Create, update, and track flight strips throughout their lifecycle
-- **Real-time Monitoring**: Live visualization of drone operations and flight strip status
-- **Zone-based Operations**: Coordinate activities across designated operational areas
-- **Conflict Detection**: Identify and manage potential conflicts between flight operations
+### Module Capabilities
+
+- **6-Zone Airspace Management**: Red, Orange, Green, Purple, Blue, and Yellow zones with interactive 3D visualization
+- **Flight Strip Management**: Complete lifecycle management of flight strips with filtering and creation capabilities
+- **Real-time Drone Tracking**: Receives and displays positions from drones that voluntarily share information
+- **Interactive 3D Map**: Cesium-powered 3D viewer with clickable zones and drone markers
+- **Multi-Zone Filtering**: Select multiple zones to filter aircraft operations across different areas
 
 ## Architecture
 
@@ -29,21 +30,22 @@ UTM Manager provides a specialized web-based interface for managing drone flight
 - **Deployment**: Docker containerized with nginx reverse proxy
 - **Database**: MongoDB integration via Motor async driver
 
-## F1 Brazil 2025 Configuration
+## F1 Event Airspace Zone Configuration
 
-This system is specifically configured for the Formula 1 Brazil 2025 testing event with the following operational setup:
+This module manages 6 designated airspace zones specifically configured for the Formula 1 Brazil 2025 event:
 
-### Operational Zones
-- **Zone 1-6**: Pre-configured operational areas around the circuit
-- **Zone Boundaries**: Defined coordinates and altitude restrictions
-- **Zone Status**: Real-time monitoring of zone availability and conflicts
-- **Zone Coordination**: Cross-zone operation management and handoffs
+### Flight Strip Management Workflow
+1. **Authority Request**: Police, firefighters, or authorized personnel request drone operation
+2. **Strip Creation**: Airspace Traffic Controller creates flight strip with zone assignment
+3. **Zone Documentation**: Records aircraft ID, altitude, departure/arrival times, and operator details
+4. **Real-time Monitoring**: Track drone positions and zone occupancy status
+5. **Multi-zone Operations**: Coordinate flights across multiple zones when required
 
-### Flight Strip Workflow
-1. **Strip Creation**: Define flight parameters and assign to operational zone
-2. **Pre-flight Validation**: Automated conflict checking and zone availability
-3. **Active Monitoring**: Real-time tracking during flight operations
-4. **Post-flight Processing**: Operation completion and data archival
+### Interactive Features
+- **Zone Selection**: Click on 3D zones to filter aircraft in specific areas
+- **Drone Tracking**: Click on drone markers to view detailed flight information
+- **Multi-zone Filtering**: Select multiple zones simultaneously for comprehensive monitoring
+- **Flight Strip Sidebar**: Complete list of active flights with filtering capabilities
 
 ## Quick Start
 
@@ -104,53 +106,48 @@ Once running, access the interactive API documentation at:
 
 ### Main Endpoints
 
-- `/api/flight-strips` - Flight strip lifecycle management
-- `/api/zones` - Operational zone configuration and status
-- `/api/operations` - Drone operation tracking and coordination
-- `/api/conflicts` - Conflict detection and resolution
-- `/api/airspace` - Airspace management operations
-- `/api/healthy` - System health checks
+- `/api/flights` - Airspace conflict detection and resolution within F1 zones
+- `/api/flights` - Airspace conflict detection and resolution within F1 zones
+- `/api/healthy` - Module health monitoring and BR-UTM integration status
 
 ## Project Structure
 
 ```
-├── backend/                 # FastAPI backend
-│   ├── adapters/           # External service adapters
-│   ├── application/        # Application services (flight strips, zones)
-│   ├── domain/            # Domain models (flight strips, operations, zones)
-│   ├── infrastructure/    # Infrastructure components
-│   ├── ports/             # Interface definitions
-│   ├── routes/            # API route handlers
-│   ├── schemas/           # Pydantic models (flight strip schemas)
-│   └── services/          # Business logic services
-├── interface/             # React frontend
-│   ├── src/              # Source code
-│   │   ├── components/   # Flight strip components
-│   │   ├── zones/        # Zone management interface
-│   │   └── operations/   # Operation tracking views
-│   ├── public/           # Static assets
-│   └── dist/             # Build output
-├── docs/                 # Documentation
-└── docker-compose.yml    # Production deployment
+├── backend/               # FastAPI backend for airspace management
+│   ├── adapters/          # External service adapters for drone data
+│   ├── application/       # Flight strip and zone management services
+│   ├── domain/            # Domain models for airspace, zones, and operations
+│   ├── infrastructure/    # Database and external system integration
+│   ├── ports/             # Interface definitions for Brazilian airspace standards
+│   ├── routes/            # API endpoints for flight strips and zone management
+│   ├── schemas/           # Data models for flight strips and zone operations
+│   └── services/          # Business logic for airspace traffic control
+├── interface/             # React frontend with 3D visualization
+│   ├── src/               # Source code following feature-sliced architecture
+│   │   ├── app/           # App related config files
+│   │   ├── pages/         # Page-wise divisions of the app
+│   │   └── shared/        # Shared files related to the application
+│   ├── public/            # Static assets and zone configuration
+│   └── dist/              # Production build
+├── assets/                # Demo screenshots and videos
+├── docs/                  # System documentation and ADRs
+└── docker-compose.yml     # Production deployment configuration
 ```
 
 ## Technology Stack
 
 ### Backend
 - **FastAPI** - Modern Python web framework
-- **Motor** - Async MongoDB driver
 - **Pydantic** - Data validation and serialization
-- **JWT** - Authentication and authorization
 - **Uvicorn** - ASGI server
 
 ### Frontend
-- **React 19** - UI framework
-- **TypeScript** - Type safety
-- **Vite** - Build tool and dev server
-- **Cesium** - 3D globe and mapping for zone visualization
-- **Tailwind CSS** - Styling framework
-- **Radix UI** - Component primitives for flight strip UI
-- **React Query** - Data fetching and real-time updates
+- **React 19** - UI framework for airspace management interface
+- **TypeScript** - Type safety for flight strip and zone data
+- **Vite** - Build tool and development server
+- **Cesium** - 3D globe visualization for the 6 airspace zones
+- **Tailwind CSS** - Styling framework for responsive design
+- **Radix UI** - Component primitives for flight strip management UI
 
 ## Development Guidelines
 
@@ -158,25 +155,6 @@ Once running, access the interactive API documentation at:
 - Backend follows Black formatting (line length: 79)
 - Frontend uses ESLint with TypeScript rules
 - Both codebases maintain strict type checking
-
-### Testing
-```bash
-# Backend tests
-cd backend
-pytest
-
-# Frontend tests
-cd interface
-npm run test
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes following the code style guidelines
-4. Add tests for new functionality
-5. Submit a pull request
 
 ## License
 
