@@ -101,10 +101,6 @@ docker-compose up -d
 
 ## API Documentation
 
-Once running, access the interactive API documentation at:
-- Swagger UI: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
-
 ### Main Backend Endpoints
 
 - `/api/strips` - Managing the flight strips, which is managed in a different service
