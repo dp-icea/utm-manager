@@ -105,9 +105,9 @@ Once running, access the interactive API documentation at:
 - Swagger UI: `http://localhost:8000/docs`
 - ReDoc: `http://localhost:8000/redoc`
 
-### Main Endpoints
+### Main Backend Endpoints
 
-- `/api/flights` - Airspace conflict detection and resolution within F1 zones
+- `/api/strips` - Managing the flight strips, which is managed in a different service
 - `/api/flights` - Airspace conflict detection and resolution within F1 zones
 - `/api/healthy` - Module health monitoring and BR-UTM integration status
 
