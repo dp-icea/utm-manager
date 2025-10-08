@@ -1,8 +1,6 @@
 import { Cartesian3 } from "cesium";
 import * as Cesium from "cesium";
-import {
-  OperationalIntentStateColor,
-} from "@/shared/model";
+import { OperationalIntentStateColor } from "@/shared/model";
 import type {
   OperationalIntent,
   Constraint,
@@ -11,12 +9,17 @@ import type {
   Rectangle,
   Volume3D,
   Volume4D,
+  FlightArea,
 } from "@/shared/model";
 import {
+  areArraysEqual,
   isConstraint,
   isIdentificationServiceArea,
   isOperationalIntent,
 } from "@/shared/lib";
+
+const DEFAULT_POLYGON_ALPHA = 0.3;
+const SELECTED_POLYGON_ALPHA = 0.5;
 
 function sum(arr: number[]): number {
   return arr.reduce((acc, val) => acc + val, 0);
@@ -34,43 +37,186 @@ interface DisplayedEntity {
   entityIds: RegionId[];
 }
 
+interface GeoJsonFormat {
+  type: "FeatureCollection";
+  features: Array<{
+    type: "Feature";
+    properties: {
+      name?: string;
+      color?: string;
+      height?: number;
+      [key: string]: any;
+    };
+    geometry: {
+      type: "Polygon";
+      coordinates: number[][][];
+    };
+  }>;
+}
+
 export class MapEntityManager {
   private viewer: Cesium.Viewer;
   private displayedEntities: Record<RegionId, DisplayedEntity> = {};
   private handler: Cesium.ScreenSpaceEventHandler;
   private flights: Record<string, Cesium.Entity[]> = {};
+  private geoJsonData: GeoJsonFormat | null = null;
+  private geoJsonEntities: Cesium.Entity[] = [];
+  private selectedGeoJsonEntities: Set<Cesium.Entity> = new Set();
+
+  private onSelectedGeoJsonEntitiesChange: () => void = () => {};
 
   constructor(viewer: Cesium.Viewer) {
     this.viewer = viewer;
 
     this.viewer.cesiumWidget.creditContainer.remove();
 
-    navigator.geolocation.getCurrentPosition(
-      (position: GeolocationPosition) => {
-        const { latitude, longitude, altitude } = position.coords;
+    const [latitude, longitude] = [-23.713416, -46.693356];
+    const cameraAltitude = 5000;
 
-        const cameraAltitude = altitude ? altitude + 1000 : 2000;
-
-        this.viewer.camera.setView({
-          destination: Cartesian3.fromDegrees(
-            longitude,
-            latitude,
-            cameraAltitude,
-          ),
-          orientation: {
-            heading: Cesium.Math.toRadians(0),
-            pitch: Cesium.Math.toRadians(-45),
-            roll: 0,
-          },
-        });
+    this.viewer.camera.setView({
+      destination: Cartesian3.fromDegrees(longitude, latitude, cameraAltitude),
+      orientation: {
+        heading: Cesium.Math.toRadians(0),
+        pitch: Cesium.Math.toRadians(-70),
+        roll: 0,
       },
-    );
+    });
 
     this.handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
+
+    this.loadGeoJsonZones();
+
+    this.addGeojsonEntityClickCallback((pickedEntity: Cesium.Entity) => {
+      console.log("Clicked on an entity");
+      // Make a logic for selecting the regions
+      if (this.selectedGeoJsonEntities.size > 1) {
+        this.selectedGeoJsonEntities.forEach((entity) => {
+          this.deselectGeoJsonEntity(entity);
+        });
+      }
+
+      if (this.selectedGeoJsonEntities.has(pickedEntity)) {
+        this.deselectGeoJsonEntity(pickedEntity);
+      } else {
+        this.selectedGeoJsonEntities.forEach((entity) => {
+          this.deselectGeoJsonEntity(entity);
+        });
+        this.selectGeoJsonEntity(pickedEntity);
+      }
+    });
+
+    this.addGeojsonMultiEntityClickCallback((pickedEntity: Cesium.Entity) => {
+      console.log("Clicked on an entity with CTRL");
+      // Make a logic for selecting the regions
+      if (this.selectedGeoJsonEntities.has(pickedEntity)) {
+        this.deselectGeoJsonEntity(pickedEntity);
+      } else {
+        this.selectGeoJsonEntity(pickedEntity);
+      }
+    });
+  }
+
+  private selectGeoJsonEntity(entity: Cesium.Entity) {
+    const selectedRegionId = entity.id;
+    const color =
+      this.geoJsonData?.features.find(
+        (feature) => feature.properties?.name === selectedRegionId,
+      )?.properties?.color || "#808080";
+    entity.polygon.material = Cesium.Color.fromCssColorString(color).withAlpha(
+      SELECTED_POLYGON_ALPHA,
+    );
+    this.selectedGeoJsonEntities.add(entity);
+    this.onSelectedGeoJsonEntitiesChange();
+  }
+
+  private deselectGeoJsonEntity(entity: Cesium.Entity) {
+    const selectedRegionId = entity.id;
+    const color =
+      this.geoJsonData?.features.find(
+        (feature) => feature.properties?.name === selectedRegionId,
+      )?.properties?.color || "#808080";
+    entity.polygon.material = Cesium.Color.fromCssColorString(color).withAlpha(
+      DEFAULT_POLYGON_ALPHA,
+    );
+    this.selectedGeoJsonEntities.delete(entity);
+    this.onSelectedGeoJsonEntitiesChange();
+  }
+
+  addSelectedEntitiesChangeCallback(
+    callback: (entities: Set<Cesium.Entity>) => void,
+  ) {
+    this.onSelectedGeoJsonEntitiesChange = () => {
+      callback(this.selectedGeoJsonEntities);
+    };
+  }
+
+  updateSelectedEntities(arr: Array<FlightArea>) {
+    const currentSelectedIds = Array.from(this.selectedGeoJsonEntities).map(
+      (entity) => entity.id,
+    );
+
+    if (areArraysEqual(currentSelectedIds, arr)) {
+      return;
+    }
+
+    console.log("The Entity Manager is trying to update itself with", arr);
+
+    this.selectedGeoJsonEntities.forEach((entity) => {
+      this.deselectGeoJsonEntity(entity);
+    });
+
+    console.log("GeoJsonEntities", this.geoJsonEntities);
+
+    this.geoJsonEntities.forEach((entity) => {
+      if (arr.includes(entity.id as FlightArea)) {
+        this.selectGeoJsonEntity(entity);
+      }
+    });
   }
 
   addMoveEndCallback(callback: () => void) {
     this.viewer.camera.moveEnd.addEventListener(callback);
+  }
+
+  addGeojsonEntityClickCallback(callback: (entity: Cesium.Entity) => void) {
+    console.log("Handler", this.handler);
+    this.handler.setInputAction(
+      (event: Cesium.ScreenSpaceEventHandler.PositionedEvent) => {
+        console.log("Left Click w/o CTRL");
+        const pickedObject = this.viewer.scene.pick(event.position);
+        if (Cesium.defined(pickedObject) && Cesium.defined(pickedObject.id)) {
+          const pickedEntity = pickedObject.id as Cesium.Entity;
+          console.log("GeoJsonEntities", this.geoJsonEntities);
+          if (this.geoJsonEntities.some((e) => e.id === pickedEntity.id)) {
+            callback(pickedEntity);
+          }
+        } else {
+          this.selectedGeoJsonEntities.forEach((entity) => {
+            this.deselectGeoJsonEntity(entity);
+          });
+        }
+      },
+      Cesium.ScreenSpaceEventType.LEFT_CLICK,
+    );
+  }
+
+  addGeojsonMultiEntityClickCallback(
+    callback: (entity: Cesium.Entity) => void,
+  ) {
+    console.log("Handler", this.handler);
+    this.handler.setInputAction(
+      (event: Cesium.ScreenSpaceEventHandler.PositionedEvent) => {
+        const pickedObject = this.viewer.scene.pick(event.position);
+        if (Cesium.defined(pickedObject) && Cesium.defined(pickedObject.id)) {
+          const pickedEntity = pickedObject.id as Cesium.Entity;
+          if (this.geoJsonEntities.some((e) => e.id === pickedEntity.id)) {
+            callback(pickedEntity);
+          }
+        }
+      },
+      Cesium.ScreenSpaceEventType.LEFT_CLICK,
+      Cesium.KeyboardEventModifier.CTRL,
+    );
   }
 
   addEntityClickCallback(
@@ -205,6 +351,84 @@ export class MapEntityManager {
     });
   }
 
+  async loadGeoJsonZones() {
+    try {
+      const response = await fetch("/zones.geojson");
+      if (!response.ok) {
+        throw new Error(`Failed to load GeoJSON: ${response.statusText}`);
+      }
+
+      this.geoJsonData = await response.json();
+      this.displayGeoJsonPolygons(this.geoJsonData);
+      console.log(this.geoJsonEntities);
+    } catch (error) {
+      console.error("Error loading GeoJSON zones:", error);
+    }
+  }
+
+  clearGeoJsonZones() {
+    this.geoJsonEntities.forEach((entity) => {
+      this.viewer.entities.removeById(entity.id);
+    });
+    this.geoJsonEntities = [];
+  }
+
+  private displayGeoJsonPolygon(
+    id: string,
+    coordinates: number[][],
+    color: string,
+  ) {
+    // Convert hex color to Cesium Color
+    let cesiumColor: Cesium.Color;
+    try {
+      cesiumColor = Cesium.Color.fromCssColorString(color);
+    } catch (error) {
+      console.warn(`Invalid color "${color}", using gray`);
+      cesiumColor = Cesium.Color.GRAY;
+    }
+
+    // Convert GeoJSON coordinates to Cesium Cartesian3
+    const positions = coordinates.map((coord) =>
+      Cesium.Cartesian3.fromDegrees(coord[0], coord[1], 0),
+    );
+
+    const entity = this.viewer.entities.add({
+      id,
+      polygon: {
+        hierarchy: new Cesium.PolygonHierarchy(positions),
+        material: cesiumColor.withAlpha(DEFAULT_POLYGON_ALPHA),
+        outline: true,
+        outlineColor: cesiumColor,
+        height: 750,
+        extrudedHeight: 850, // Example extruded height
+      },
+    });
+
+    this.geoJsonEntities.push(entity);
+  }
+
+  private displayGeoJsonPolygons(geoJsonData: any) {
+    // Clear existing GeoJSON entities
+    this.clearGeoJsonZones();
+
+    if (!geoJsonData.features || !Array.isArray(geoJsonData.features)) {
+      console.warn("Invalid GeoJSON format: no features array found");
+      return;
+    }
+
+    geoJsonData.features.forEach((feature: any, index: number) => {
+      if (feature.geometry?.type !== "Polygon") {
+        return; // Skip non-polygon features
+      }
+
+      const coordinates = feature.geometry.coordinates[0]; // Get outer ring
+      const colorProperty = feature.properties?.color || "#808080"; // Default to gray
+      const id = feature.properties?.name || `${index}`;
+
+      this.displayGeoJsonPolygon(id, coordinates, colorProperty);
+    });
+  }
+
   displayRegions(
     regions: Array<
       Constraint | OperationalIntent | IdentificationServiceAreaFull
@@ -218,7 +442,7 @@ export class MapEntityManager {
           (entity) => entity.entityIds.length,
         ),
       ) +
-      Object.values(this.flights).flat().length
+        Object.values(this.flights).flat().length
     ) {
       this.viewer.entities.removeAll();
       this.displayedEntities = {};

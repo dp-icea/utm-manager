@@ -1,4 +1,8 @@
-import { type FlightStrip, FLIGHT_AREA_COLORS } from "@/shared/model";
+import {
+  type FlightStrip,
+  FLIGHT_AREA_COLORS,
+  formatFlightArea,
+} from "@/shared/model";
 import { Box, IconButton, Typography, Chip } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
@@ -99,7 +103,7 @@ const FlightStripCard = ({ strip, onRemove }: FlightStripCardProps) => {
               {strip.id}
             </Typography>
             <Chip
-              label={strip.flightArea}
+              label={formatFlightArea(strip.flightArea)}
               size="small"
               sx={{
                 bgcolor: FLIGHT_AREA_COLORS[strip.flightArea],

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { FlightArea, FlightStrip } from "@/shared/model";
 import {
   Box,
@@ -12,6 +12,7 @@ import {
   IconButton,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import { useStrips } from "@/shared/lib/strips";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import CloseIcon from "@mui/icons-material/Close";
 import {
@@ -32,12 +33,13 @@ import {
 import FlightStripCard from "./flight-strips/FlightStripCard";
 import AddFlightStripForm from "./flight-strips/AddFlightStripForm";
 import FlightStripFilters from "./flight-strips/FlightStripFilters";
+import { areArraysEqual } from "@/shared/lib";
 
 export const SidebarPanel = () => {
   const [strips, setStrips] = useState<FlightStrip[]>([
     {
       id: "FL001",
-      flightArea: "Red",
+      flightArea: "red",
       height: 100,
       takeoffSpace: "A1",
       landingSpace: "B2",
@@ -46,7 +48,7 @@ export const SidebarPanel = () => {
     },
     {
       id: "FL002",
-      flightArea: "Blue",
+      flightArea: "blue",
       height: 150,
       takeoffSpace: "A2",
       landingSpace: "B3",
@@ -55,7 +57,7 @@ export const SidebarPanel = () => {
     },
     {
       id: "FL003",
-      flightArea: "Green",
+      flightArea: "green",
       height: 120,
       takeoffSpace: "A3",
       landingSpace: "B1",
@@ -64,7 +66,7 @@ export const SidebarPanel = () => {
     },
     {
       id: "FL004",
-      flightArea: "Yellow",
+      flightArea: "yellow",
       height: 180,
       takeoffSpace: "A4",
       landingSpace: "B4",
@@ -73,7 +75,7 @@ export const SidebarPanel = () => {
     },
     {
       id: "FL005",
-      flightArea: "Purple",
+      flightArea: "purple",
       height: 90,
       takeoffSpace: "A5",
       landingSpace: "B5",
@@ -82,7 +84,7 @@ export const SidebarPanel = () => {
     },
     {
       id: "FL006",
-      flightArea: "Orange",
+      flightArea: "orange",
       height: 160,
       takeoffSpace: "A6",
       landingSpace: "B6",
@@ -96,6 +98,7 @@ export const SidebarPanel = () => {
   const [snackbar, setSnackbar] = useState({ open: false, message: "" });
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
+  const { activeStripIds, setActiveStripIds } = useStrips();
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -147,12 +150,33 @@ export const SidebarPanel = () => {
     return true;
   });
 
+  const onRegionSelectOnViewer = () => {
+    console.log("On Region Select On Viewer");
+    console.log("Active Regions in the Map", activeStripIds);
+    console.log("Selected Colors in Filter", selectedColors);
+    if (!areArraysEqual(activeStripIds, selectedColors)) {
+      setSelectedColors(activeStripIds as FlightArea[]);
+    }
+  };
+
+  const onRegionSelectOnFilter = () => {
+    console.log("On Region Select On Filter");
+    console.log("Active Regions in the Map", activeStripIds);
+    console.log("Selected Colors in Filter", selectedColors);
+    if (!areArraysEqual(activeStripIds, selectedColors)) {
+      setActiveStripIds(selectedColors);
+    }
+  };
+
+  useEffect(onRegionSelectOnViewer, [activeStripIds]);
+  useEffect(onRegionSelectOnFilter, [selectedColors]);
+
   return (
     <>
       <Box
         sx={{
           width: 320,
-          height: "calc(100vh - 73px)",
+          height: "100vh",
           borderRight: 1,
           borderColor: "divider",
           bgcolor: "background.paper",

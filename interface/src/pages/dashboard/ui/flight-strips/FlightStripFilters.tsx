@@ -1,5 +1,7 @@
 import { Box, Autocomplete, TextField, Chip } from "@mui/material";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
+import { FLIGHT_AREA_LABELS, FLIGHT_AREAS } from "@/shared/model";
+
 import type { FlightArea } from "@/shared/model";
 import dayjs, { Dayjs } from "dayjs";
 
@@ -16,15 +18,6 @@ const parseTimeString = (timeStr: string): Dayjs | null => {
   if (!timeStr) return null;
   return dayjs(timeStr, "HH:mm");
 };
-
-const FLIGHT_AREAS: FlightArea[] = [
-  "Red",
-  "Yellow",
-  "Orange",
-  "Green",
-  "Blue",
-  "Purple",
-];
 
 const FlightStripFilters = ({
   selectedColors,
@@ -45,12 +38,17 @@ const FlightStripFilters = ({
           value.map((option, index) => (
             <Chip
               variant="outlined"
-              label={option}
+              label={FLIGHT_AREA_LABELS[option]}
               {...getTagProps({ index })}
               key={option}
             />
           ))
         }
+        renderOption={(props, option) => (
+          <li {...props} key={option}>
+            {FLIGHT_AREA_LABELS[option]}
+          </li>
+        )}
         renderInput={(params) => (
           <TextField
             {...params}

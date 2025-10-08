@@ -11,23 +11,21 @@ import {
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import type { FlightArea, FlightStrip } from "@/shared/model";
 import dayjs, { Dayjs } from "dayjs";
-
-const FLIGHT_AREAS: FlightArea[] = [
-  "Red",
-  "Yellow",
-  "Orange",
-  "Green",
-  "Blue",
-  "Purple",
-];
+import { FLIGHT_AREAS } from "@/shared/model";
+import { useStrips } from "@/shared/lib/strips";
+import { formatFlightArea } from "@/shared/model";
 
 interface AddFlightStripFormProps {
   onAdd: (strip: FlightStrip) => void;
 }
 
 const AddFlightStripForm = ({ onAdd }: AddFlightStripFormProps) => {
+  const { activeStripIds } = useStrips();
+
   const [id, setId] = useState("");
-  const [flightArea, setFlightArea] = useState<FlightArea>("Red");
+  const [flightArea, setFlightArea] = useState<FlightArea>(
+    activeStripIds[0] || "red",
+  );
   const [height, setHeight] = useState("");
   const [takeoffSpace, setTakeoffSpace] = useState("");
   const [landingSpace, setLandingSpace] = useState("");
@@ -53,7 +51,7 @@ const AddFlightStripForm = ({ onAdd }: AddFlightStripFormProps) => {
 
     // Reset form
     setId("");
-    setFlightArea("Red");
+    setFlightArea("red");
     setHeight("");
     setTakeoffSpace("");
     setLandingSpace("");
@@ -85,7 +83,7 @@ const AddFlightStripForm = ({ onAdd }: AddFlightStripFormProps) => {
         >
           {FLIGHT_AREAS.map((area) => (
             <MenuItem key={area} value={area}>
-              {area}
+              {formatFlightArea(area)}
             </MenuItem>
           ))}
         </Select>

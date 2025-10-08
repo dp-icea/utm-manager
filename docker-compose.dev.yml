@@ -10,7 +10,7 @@ services:
     logging:
       driver: fluentd
       options:
-        tag: utm-observer-backend
+        tag: utm-manager-backend
   interface:
     build: ./interface
     ports:
@@ -20,4 +20,4 @@ services:
     logging:
       driver: fluentd
       options:
-        tag: utm-observer-frontend
+        tag: utm-manager-frontend

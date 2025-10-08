@@ -1,10 +1,32 @@
 export type FlightArea =
-  | "Red"
-  | "Yellow"
-  | "Orange"
-  | "Green"
-  | "Blue"
-  | "Purple";
+  | "red"
+  | "yellow"
+  | "orange"
+  | "green"
+  | "blue"
+  | "purple";
+
+export const FLIGHT_AREAS: FlightArea[] = [
+  "red",
+  "yellow",
+  "orange",
+  "green",
+  "blue",
+  "purple",
+];
+
+export const FLIGHT_AREA_LABELS: Record<FlightArea, string> = {
+  red: "Red",
+  yellow: "Yellow",
+  orange: "Orange",
+  green: "Green",
+  blue: "Blue",
+  purple: "Purple",
+};
+
+export function formatFlightArea(area: FlightArea): string {
+  return FLIGHT_AREA_LABELS[area];
+}
 
 export interface FlightStrip {
   id: string;
@@ -17,10 +39,10 @@ export interface FlightStrip {
 }
 
 export const FLIGHT_AREA_COLORS: Record<FlightArea, string> = {
-  Red: "hsl(var(--flight-red))",
-  Yellow: "hsl(var(--flight-yellow))",
-  Orange: "hsl(var(--flight-orange))",
-  Green: "hsl(var(--flight-green))",
-  Blue: "hsl(var(--flight-blue))",
-  Purple: "hsl(var(--flight-purple))",
+  red: "hsl(var(--flight-red))",
+  yellow: "hsl(var(--flight-yellow))",
+  orange: "hsl(var(--flight-orange))",
+  green: "hsl(var(--flight-green))",
+  blue: "hsl(var(--flight-blue))",
+  purple: "hsl(var(--flight-purple))",
 };
