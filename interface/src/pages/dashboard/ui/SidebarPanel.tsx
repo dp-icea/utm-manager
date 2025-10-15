@@ -175,8 +175,8 @@ export const SidebarPanel = () => {
     <>
       <Box
         sx={{
-          width: 320,
-          height: "100vh",
+          width: "100%",
+          height: "100%",
           borderRight: 1,
           borderColor: "divider",
           bgcolor: "background.paper",
