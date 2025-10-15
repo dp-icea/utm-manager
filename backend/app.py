@@ -7,6 +7,8 @@ from starlette.responses import StreamingResponse
 from routes.airspace import router as AirspaceRouter
 from routes.constraints import router as ConstraintsRouter
 from routes.health import router as HealthRouter
+from routes.flight_strips import router as FlightStripsRouter
+from infrastructure.mongodb_client import mongodb_client
 from schemas.api import ApiException
 import logging
 
@@ -15,8 +17,25 @@ import logging
 async def lifespan(app: FastAPI):
     """
     Lifespan event for the FastAPI application.
+    Manages MongoDB connection lifecycle.
     """
+    # Startup
+    try:
+        await mongodb_client.connect()
+        await mongodb_client.create_indexes()
+        logging.info("Application startup completed")
+    except Exception as e:
+        logging.error(f"Failed to initialize application: {e}")
+        raise
+
     yield
+
+    # Shutdown
+    try:
+        await mongodb_client.disconnect()
+        logging.info("Application shutdown completed")
+    except Exception as e:
+        logging.error(f"Error during application shutdown: {e}")
 
 
 app = FastAPI(
@@ -80,8 +99,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(AirspaceRouter, tags=["Airspace"], prefix="/airspace")
-app.include_router(
-    ConstraintsRouter, tags=["Constraints"], prefix="/constraints"
-)
-app.include_router(HealthRouter, tags=["Health"], prefix="/healthy")
+app.include_router(AirspaceRouter, tags=["Airspace"])
+app.include_router(ConstraintsRouter, tags=["Constraints"])
+app.include_router(HealthRouter, tags=["Health"])
+app.include_router(FlightStripsRouter, tags=["Flight Strips"])

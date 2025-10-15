@@ -1,5 +1,5 @@
 import {
-  type FlightStrip,
+  type FlightStripUI,
   FLIGHT_AREA_COLORS,
   formatFlightArea,
 } from "@/shared/model";
@@ -13,7 +13,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
 interface FlightStripCardProps {
-  strip: FlightStrip;
+  strip: FlightStripUI;
   onRemove: (id: string) => void;
 }
 

@@ -9,7 +9,7 @@ from adapters.dss_adapter import DSSAdapter
 from domain.base import LatLngPoint
 from schemas.api import ApiResponse, ApiException
 
-router = APIRouter()
+router = APIRouter(tags=["Constraints"], prefix="/constraints")
 
 
 def get_constraint_management_use_case() -> ConstraintManagementUseCase:

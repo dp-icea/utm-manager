@@ -9,14 +9,14 @@ import {
   InputLabel,
 } from "@mui/material";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
-import type { FlightArea, FlightStrip } from "@/shared/model";
+import type { FlightArea, FlightStripUI } from "@/shared/model";
 import dayjs, { Dayjs } from "dayjs";
 import { FLIGHT_AREAS } from "@/shared/model";
 import { useStrips } from "@/shared/lib/strips";
 import { formatFlightArea } from "@/shared/model";
 
 interface AddFlightStripFormProps {
-  onAdd: (strip: FlightStrip) => void;
+  onAdd: (strip: FlightStripUI) => void;
 }
 
 const AddFlightStripForm = ({ onAdd }: AddFlightStripFormProps) => {
@@ -37,7 +37,7 @@ const AddFlightStripForm = ({ onAdd }: AddFlightStripFormProps) => {
 
     if (!takeoffTime || !landingTime) return;
 
-    const newStrip: FlightStrip = {
+    const newStrip: FlightStripUI = {
       id,
       flightArea,
       height: Number(height),

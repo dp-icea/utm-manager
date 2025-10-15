@@ -3,7 +3,7 @@ from fastapi import APIRouter
 
 from schemas.api import ApiException, ApiResponse
 
-router = APIRouter()
+router = APIRouter(tags=["Health"], prefix="/healthy")
 
 
 @router.get(

@@ -28,7 +28,21 @@ export function formatFlightArea(area: FlightArea): string {
   return FLIGHT_AREA_LABELS[area];
 }
 
+// Synchronized with backend schema
 export interface FlightStrip {
+  id: string;
+  flight_area: FlightArea;  // Changed to match backend snake_case
+  height: number;
+  takeoff_space: string;    // Changed to match backend snake_case
+  landing_space: string;    // Changed to match backend snake_case
+  takeoff_time: string;     // Changed to match backend snake_case
+  landing_time: string;     // Changed to match backend snake_case
+  created_at: string;       // Added timestamp fields from backend
+  updated_at: string;
+}
+
+// Legacy interface for backward compatibility with existing UI components
+export interface FlightStripUI {
   id: string;
   flightArea: FlightArea;
   height: number;
@@ -36,6 +50,31 @@ export interface FlightStrip {
   landingSpace: string;
   takeoffTime: string;
   landingTime: string;
+}
+
+// Conversion functions between backend and UI formats
+export function toUIFormat(strip: FlightStrip): FlightStripUI {
+  return {
+    id: strip.id,
+    flightArea: strip.flight_area,
+    height: strip.height,
+    takeoffSpace: strip.takeoff_space,
+    landingSpace: strip.landing_space,
+    takeoffTime: strip.takeoff_time,
+    landingTime: strip.landing_time,
+  };
+}
+
+export function toBackendFormat(strip: FlightStripUI): Omit<FlightStrip, 'created_at' | 'updated_at'> {
+  return {
+    id: strip.id,
+    flight_area: strip.flightArea,
+    height: strip.height,
+    takeoff_space: strip.takeoffSpace,
+    landing_space: strip.landingSpace,
+    takeoff_time: strip.takeoffTime,
+    landing_time: strip.landingTime,
+  };
 }
 
 export const FLIGHT_AREA_COLORS: Record<FlightArea, string> = {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import type { FlightArea, FlightStrip } from "@/shared/model";
+import type { FlightArea, FlightStripUI, toUIFormat } from "@/shared/model";
 import {
   Box,
   Typography,
@@ -36,7 +36,7 @@ import FlightStripFilters from "./flight-strips/FlightStripFilters";
 import { areArraysEqual } from "@/shared/lib";
 
 export const SidebarPanel = () => {
-  const [strips, setStrips] = useState<FlightStrip[]>([
+  const [strips, setStrips] = useState<FlightStripUI[]>([
     {
       id: "FL001",
       flightArea: "red",
@@ -107,7 +107,7 @@ export const SidebarPanel = () => {
     }),
   );
 
-  const handleAddStrip = (strip: FlightStrip) => {
+  const handleAddStrip = (strip: FlightStripUI) => {
     setStrips([...strips, strip]);
     setSnackbar({
       open: true,
