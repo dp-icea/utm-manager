@@ -18,7 +18,7 @@ class FlightArea(str, Enum):
 class CreateFlightStripRequest(BaseModel):
     """Request schema for creating a new flight strip"""
     
-    id: str = Field(..., min_length=1, max_length=20, description="Flight strip ID")
+    name: str = Field(..., min_length=1, max_length=20, description="Flight strip name")
     flight_area: FlightArea = Field(..., description="Flight area color zone")
     height: int = Field(..., gt=0, description="Flight height in meters")
     takeoff_space: str = Field(..., min_length=1, max_length=10, description="Takeoff space identifier")

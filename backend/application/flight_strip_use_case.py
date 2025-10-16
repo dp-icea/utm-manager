@@ -27,16 +27,16 @@ class FlightStripUseCase:
     ) -> FlightStrip:
         """Create a new flight strip with business validation"""
         try:
-            # Business rule: Check for duplicate IDs
-            existing = await self.repository.get_by_flight_id(flight_strip.id)
+            # Business rule: Check for duplicate names
+            existing = await self.repository.get_by_flight_name(flight_strip.name)
             if existing:
                 raise ApiException(
                     status_code=HTTPStatus.CONFLICT,
                     message=(
-                        f"Flight strip with ID '{flight_strip.id}' already"
+                        f"Flight strip with name '{flight_strip.name}' already"
                         " exists"
                     ),
-                    details={"existing_id": existing.id},
+                    details={"existing_name": existing.name},
                 )
 
             # Set creation timestamp
@@ -46,7 +46,7 @@ class FlightStripUseCase:
             created_strip = await self.repository.create(flight_strip)
 
             logging.info(
-                f"Created flight strip: {created_strip.id} in"
+                f"Created flight strip: {created_strip.name} in"
                 f" {created_strip.flight_area} area"
             )
             return created_strip
@@ -87,17 +87,17 @@ class FlightStripUseCase:
                 details=str(e),
             )
 
-    async def get_flight_strip_by_flight_id(
-        self, flight_id: str
+    async def get_flight_strip_by_flight_name(
+        self, flight_name: str
     ) -> FlightStrip:
-        """Retrieve flight strip by flight ID"""
+        """Retrieve flight strip by flight name"""
         try:
-            flight_strip = await self.repository.get_by_flight_id(flight_id)
+            flight_strip = await self.repository.get_by_flight_name(flight_name)
             if not flight_strip:
                 raise ApiException(
                     status_code=HTTPStatus.NOT_FOUND,
                     message=(
-                        f"Flight strip with flight ID '{flight_id}' not found"
+                        f"Flight strip with flight name '{flight_name}' not found"
                     ),
                 )
 
@@ -107,7 +107,7 @@ class FlightStripUseCase:
             raise
         except Exception as e:
             logging.error(
-                f"Error retrieving flight strip by flight ID {flight_id}: {e}"
+                f"Error retrieving flight strip by flight name {flight_name}: {e}"
             )
             raise ApiException(
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
@@ -136,7 +136,7 @@ class FlightStripUseCase:
             updated_strip = await self.repository.update(existing)
 
             logging.info(
-                f"Updated flight strip: {updated_strip.id} in"
+                f"Updated flight strip: {updated_strip.name} in"
                 f" {updated_strip.flight_area} area"
             )
             return updated_strip
@@ -170,7 +170,7 @@ class FlightStripUseCase:
 
             if success:
                 logging.info(
-                    f"Deleted flight strip: {existing.id} from"
+                    f"Deleted flight strip: {existing.name} from"
                     f" {existing.flight_area} area"
                 )
 
@@ -238,4 +238,3 @@ class FlightStripUseCase:
                 message="Failed to search flight strips",
                 details=str(e),
             )
-

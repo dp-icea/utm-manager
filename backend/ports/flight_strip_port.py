@@ -22,12 +22,12 @@ class FlightStripRepositoryPort(ABC):
     
     @abstractmethod
     async def get_by_id(self, flight_strip_id: str) -> Optional[FlightStrip]:
-        """Retrieve flight strip by ID"""
+        """Retrieve flight strip by database ID"""
         pass
     
     @abstractmethod
-    async def get_by_flight_id(self, flight_id: str) -> Optional[FlightStrip]:
-        """Retrieve flight strip by flight ID"""
+    async def get_by_flight_name(self, flight_name: str) -> Optional[FlightStrip]:
+        """Retrieve flight strip by flight name"""
         pass
     
     @abstractmethod
@@ -37,7 +37,7 @@ class FlightStripRepositoryPort(ABC):
     
     @abstractmethod
     async def delete(self, flight_strip_id: str) -> bool:
-        """Delete flight strip by ID"""
+        """Delete flight strip by database ID"""
         pass
     
     @abstractmethod
@@ -69,5 +69,5 @@ class FlightStripRepositoryPort(ABC):
     
     @abstractmethod
     async def exists(self, flight_strip_id: str) -> bool:
-        """Check if flight strip exists"""
+        """Check if flight strip exists by database ID"""
         pass

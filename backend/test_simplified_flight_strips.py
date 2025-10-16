@@ -67,14 +67,14 @@ async def test_flight_strips():
             try:
                 created = await use_case.create_flight_strip(strip)
                 created_strips.append(created)
-                print(f"✅ Created: {created.id} in {created.flight_area} area")
+                print(f"✅ Created: {created.name} in {created.flight_area} area")
             except Exception as e:
-                print(f"⚠️  Strip {strip.id} might already exist: {e}")
+                print(f"⚠️  Strip {strip.name} might already exist: {e}")
                 # Try to get existing strip
-                existing = await use_case.get_flight_strip_by_flight_id(strip.id)
+                existing = await use_case.get_flight_strip_by_flight_name(strip.name)
                 if existing:
                     created_strips.append(existing)
-                    print(f"📋 Using existing: {existing.id}")
+                    print(f"📋 Using existing: {existing.name}")
         
         # Test 2: List all flight strips
         print("\n2. Listing all flight strips...")
@@ -82,26 +82,26 @@ async def test_flight_strips():
         print(f"📊 Total flight strips: {len(all_strips)}")
         
         for strip in all_strips:
-            print(f"   - {strip.id}: {strip.flight_area} area, {strip.height}m, "
+            print(f"   - {strip.name}: {strip.flight_area} area, {strip.height}m, "
                   f"{strip.takeoff_time} → {strip.landing_time}")
         
         # Test 3: Get flight strip by ID
         print("\n3. Getting flight strip by ID...")
         if created_strips:
-            test_id = created_strips[0].id
+            test_id = created_strips[0].id  # Use MongoDB ID for retrieval
             retrieved = await use_case.get_flight_strip(test_id)
-            print(f"✅ Retrieved: {retrieved.id} - {retrieved.flight_area} area")
+            print(f"✅ Retrieved: {retrieved.name} - {retrieved.flight_area} area")
         
         # Test 4: Update flight strip
         print("\n4. Updating flight strip...")
         if created_strips:
             strip_to_update = created_strips[0]
             updated = await use_case.update_flight_strip(
-                strip_to_update.id,
+                strip_to_update.id,  # Use MongoDB ID for update
                 height=200,
                 takeoff_time="09:00"
             )
-            print(f"✅ Updated: {updated.id} - Height: {updated.height}m, "
+            print(f"✅ Updated: {updated.name} - Height: {updated.height}m, "
                   f"Takeoff: {updated.takeoff_time}")
         
         # Test 5: Search by flight area
@@ -124,11 +124,11 @@ async def test_flight_strips():
         print("\n7. Deleting flight strip...")
         if len(created_strips) > 1:
             strip_to_delete = created_strips[-1]
-            success = await use_case.delete_flight_strip(strip_to_delete.id)
+            success = await use_case.delete_flight_strip(strip_to_delete.id)  # Use MongoDB ID for delete
             if success:
-                print(f"🗑️  Deleted: {strip_to_delete.id}")
+                print(f"🗑️  Deleted: {strip_to_delete.name}")
             else:
-                print(f"❌ Failed to delete: {strip_to_delete.id}")
+                print(f"❌ Failed to delete: {strip_to_delete.name}")
         
         print("\n✅ All tests completed successfully!")
         print("\n📋 Summary:")

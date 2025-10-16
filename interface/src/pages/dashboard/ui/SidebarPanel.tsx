@@ -34,64 +34,66 @@ import FlightStripCard from "./flight-strips/FlightStripCard";
 import AddFlightStripForm from "./flight-strips/AddFlightStripForm";
 import FlightStripFilters from "./flight-strips/FlightStripFilters";
 import { areArraysEqual } from "@/shared/lib";
+import { FlightStripsService } from "@/shared/api";
 
 export const SidebarPanel = () => {
   const [strips, setStrips] = useState<FlightStripUI[]>([
-    {
-      id: "FL001",
-      flightArea: "red",
-      height: 100,
-      takeoffSpace: "A1",
-      landingSpace: "B2",
-      takeoffTime: "08:30",
-      landingTime: "10:15",
-    },
-    {
-      id: "FL002",
-      flightArea: "blue",
-      height: 150,
-      takeoffSpace: "A2",
-      landingSpace: "B3",
-      takeoffTime: "09:45",
-      landingTime: "11:30",
-    },
-    {
-      id: "FL003",
-      flightArea: "green",
-      height: 120,
-      takeoffSpace: "A3",
-      landingSpace: "B1",
-      takeoffTime: "10:20",
-      landingTime: "12:45",
-    },
-    {
-      id: "FL004",
-      flightArea: "yellow",
-      height: 180,
-      takeoffSpace: "A4",
-      landingSpace: "B4",
-      takeoffTime: "11:15",
-      landingTime: "13:20",
-    },
-    {
-      id: "FL005",
-      flightArea: "purple",
-      height: 90,
-      takeoffSpace: "A5",
-      landingSpace: "B5",
-      takeoffTime: "12:30",
-      landingTime: "14:45",
-    },
-    {
-      id: "FL006",
-      flightArea: "orange",
-      height: 160,
-      takeoffSpace: "A6",
-      landingSpace: "B6",
-      takeoffTime: "13:45",
-      landingTime: "15:30",
-    },
+    // {
+    //   id: "FL001",
+    //   flightArea: "red",
+    //   height: 100,
+    //   takeoffSpace: "A1",
+    //   landingSpace: "B2",
+    //   takeoffTime: "08:30",
+    //   landingTime: "10:15",
+    // },
+    // {
+    //   id: "FL002",
+    //   flightArea: "blue",
+    //   height: 150,
+    //   takeoffSpace: "A2",
+    //   landingSpace: "B3",
+    //   takeoffTime: "09:45",
+    //   landingTime: "11:30",
+    // },
+    // {
+    //   id: "FL003",
+    //   flightArea: "green",
+    //   height: 120,
+    //   takeoffSpace: "A3",
+    //   landingSpace: "B1",
+    //   takeoffTime: "10:20",
+    //   landingTime: "12:45",
+    // },
+    // {
+    //   id: "FL004",
+    //   flightArea: "yellow",
+    //   height: 180,
+    //   takeoffSpace: "A4",
+    //   landingSpace: "B4",
+    //   takeoffTime: "11:15",
+    //   landingTime: "13:20",
+    // },
+    // {
+    //   id: "FL005",
+    //   flightArea: "purple",
+    //   height: 90,
+    //   takeoffSpace: "A5",
+    //   landingSpace: "B5",
+    //   takeoffTime: "12:30",
+    //   landingTime: "14:45",
+    // },
+    // {
+    //   id: "FL006",
+    //   flightArea: "orange",
+    //   height: 160,
+    //   takeoffSpace: "A6",
+    //   landingSpace: "B6",
+    //   takeoffTime: "13:45",
+    //   landingTime: "15:30",
+    // },
   ]);
+  const [loading, setLoading] = useState(false);
   const [selectedColors, setSelectedColors] = useState<FlightArea[]>([]);
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
@@ -111,7 +113,7 @@ export const SidebarPanel = () => {
     setStrips([...strips, strip]);
     setSnackbar({
       open: true,
-      message: `Flight strip added: ${strip.id} - ${strip.flightArea} area`,
+      message: `Flight strip added: ${strip.name} - ${strip.flightArea} area`,
     });
     setAddDialogOpen(false);
   };
@@ -167,6 +169,24 @@ export const SidebarPanel = () => {
       setActiveStripIds(selectedColors);
     }
   };
+
+  useEffect(() => {
+    const fetchStrips = async () => {
+      try {
+        setLoading(true);
+        const strips = await FlightStripsService.listAll();
+        console.log("+++ There it is the strips +++");
+        setStrips(strips);
+      } catch (error) {
+        console.error("Failed to fetch flight strips:", error);
+        setSnackbar({ open: true, message: "Failed to load flight strips" });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStrips();
+  }, []);
 
   useEffect(onRegionSelectOnViewer, [activeStripIds]);
   useEffect(onRegionSelectOnFilter, [selectedColors]);
@@ -233,7 +253,7 @@ export const SidebarPanel = () => {
                 >
                   {filteredStrips.map((strip) => (
                     <FlightStripCard
-                      key={strip.id}
+                      key={strip.name}
                       strip={strip}
                       onRemove={handleRemoveStrip}
                     />

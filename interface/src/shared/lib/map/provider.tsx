@@ -1,9 +1,12 @@
 import { useState, type ReactNode } from "react";
 import { format } from "date-fns";
-import {
-  MapState
+import { MapState } from "@/shared/model";
+import type {
+  Constraint,
+  OperationalIntent,
+  IdentificationServiceAreaFull,
+  Flight,
 } from "@/shared/model";
-import type { Constraint, OperationalIntent, IdentificationServiceAreaFull, Flight } from "@/shared/model";
 import { MapContext } from "./context";
 
 export interface FilterCategory {
@@ -46,7 +49,7 @@ export const MapProvider = ({ children }: { children: ReactNode }) => {
   const [mapState, setMapState] = useState<MapState>(MapState.ONLINE);
 
   // This is default false to allow backup values in the timeline
-  const [isLive, setIsLive] = useState<boolean>(false);
+  const [isLive, setIsLive] = useState<boolean>(true);
 
   const [flights, setFlights] = useState<Flight[]>([]);
 

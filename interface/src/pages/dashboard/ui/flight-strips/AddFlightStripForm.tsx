@@ -14,6 +14,7 @@ import dayjs, { Dayjs } from "dayjs";
 import { FLIGHT_AREAS } from "@/shared/model";
 import { useStrips } from "@/shared/lib/strips";
 import { formatFlightArea } from "@/shared/model";
+import { FlightStripsService } from "@/shared/api";
 
 interface AddFlightStripFormProps {
   onAdd: (strip: FlightStripUI) => void;
@@ -22,6 +23,7 @@ interface AddFlightStripFormProps {
 const AddFlightStripForm = ({ onAdd }: AddFlightStripFormProps) => {
   const { activeStripIds } = useStrips();
 
+  const [loading, setLoading] = useState(false);
   const [id, setId] = useState("");
   const [flightArea, setFlightArea] = useState<FlightArea>(
     activeStripIds[0] || "red",
@@ -32,13 +34,13 @@ const AddFlightStripForm = ({ onAdd }: AddFlightStripFormProps) => {
   const [takeoffTime, setTakeoffTime] = useState<Dayjs | null>(null);
   const [landingTime, setLandingTime] = useState<Dayjs | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!takeoffTime || !landingTime) return;
 
     const newStrip: FlightStripUI = {
-      id,
+      name: id,
       flightArea,
       height: Number(height),
       takeoffSpace,
@@ -47,16 +49,24 @@ const AddFlightStripForm = ({ onAdd }: AddFlightStripFormProps) => {
       landingTime: landingTime.format("HH:mm"),
     };
 
-    onAdd(newStrip);
+    try {
+      setLoading(true);
+      await FlightStripsService.create(newStrip);
+      onAdd(newStrip);
 
-    // Reset form
-    setId("");
-    setFlightArea("red");
-    setHeight("");
-    setTakeoffSpace("");
-    setLandingSpace("");
-    setTakeoffTime(null);
-    setLandingTime(null);
+      // Reset form
+      setId("");
+      setFlightArea("red");
+      setHeight("");
+      setTakeoffSpace("");
+      setLandingSpace("");
+      setTakeoffTime(null);
+      setLandingTime(null);
+    } catch (error) {
+      console.error("Failed to create flight strip:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

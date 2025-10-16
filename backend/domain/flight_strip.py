@@ -16,7 +16,13 @@ class FlightStrip(BaseModel):
     """
     
     # Core fields matching frontend interface
-    id: str = Field(..., description="Flight strip identifier")
+    name: str = Field(..., description="Flight strip identifier")
+    
+    # MongoDB document ID (not sent to frontend)
+    id: Optional[str] = Field(None, description="MongoDB document ID")
+    
+    # Call sign field (required by existing MongoDB index, auto-generated from name)
+    call_sign: Optional[str] = Field(None, description="Call sign for MongoDB compatibility")
     flight_area: FlightArea = Field(..., description="Flight area color zone")
     height: int = Field(..., gt=0, description="Flight height in meters")
     takeoff_space: str = Field(..., description="Takeoff space identifier")

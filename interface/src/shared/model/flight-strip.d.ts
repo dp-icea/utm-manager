@@ -30,20 +30,20 @@ export function formatFlightArea(area: FlightArea): string {
 
 // Synchronized with backend schema
 export interface FlightStrip {
-  id: string;
-  flight_area: FlightArea;  // Changed to match backend snake_case
+  name: string;
+  flight_area: FlightArea; // Changed to match backend snake_case
   height: number;
-  takeoff_space: string;    // Changed to match backend snake_case
-  landing_space: string;    // Changed to match backend snake_case
-  takeoff_time: string;     // Changed to match backend snake_case
-  landing_time: string;     // Changed to match backend snake_case
-  created_at: string;       // Added timestamp fields from backend
+  takeoff_space: string; // Changed to match backend snake_case
+  landing_space: string; // Changed to match backend snake_case
+  takeoff_time: string; // Changed to match backend snake_case
+  landing_time: string; // Changed to match backend snake_case
+  created_at: string; // Added timestamp fields from backend
   updated_at: string;
 }
 
 // Legacy interface for backward compatibility with existing UI components
 export interface FlightStripUI {
-  id: string;
+  name: string;
   flightArea: FlightArea;
   height: number;
   takeoffSpace: string;
@@ -55,7 +55,7 @@ export interface FlightStripUI {
 // Conversion functions between backend and UI formats
 export function toUIFormat(strip: FlightStrip): FlightStripUI {
   return {
-    id: strip.id,
+    name: strip.name,
     flightArea: strip.flight_area,
     height: strip.height,
     takeoffSpace: strip.takeoff_space,
@@ -65,9 +65,11 @@ export function toUIFormat(strip: FlightStrip): FlightStripUI {
   };
 }
 
-export function toBackendFormat(strip: FlightStripUI): Omit<FlightStrip, 'created_at' | 'updated_at'> {
+export function toBackendFormat(
+  strip: FlightStripUI,
+): Omit<FlightStrip, "created_at" | "updated_at"> {
   return {
-    id: strip.id,
+    name: strip.name,
     flight_area: strip.flightArea,
     height: strip.height,
     takeoff_space: strip.takeoffSpace,

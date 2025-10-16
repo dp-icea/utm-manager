@@ -45,7 +45,7 @@ async def create_flight_strip(
 
     # Convert request to domain model
     flight_strip = FlightStrip(
-        id=request.id,
+        name=request.name,
         flight_area=request.flight_area,
         height=request.height,
         takeoff_space=request.takeoff_space,
@@ -57,9 +57,7 @@ async def create_flight_strip(
     created_strip = await use_case.create_flight_strip(flight_strip)
 
     return FlightStripCreatedResponse(
-        flight_strip=FlightStripResponse.model_validate(
-            created_strip.model_dump()
-        )
+        flight_strip=FlightStripResponse.from_domain(created_strip)
     )
 
 
@@ -70,14 +68,58 @@ async def create_flight_strip(
     description="Delete a flight strip by its ID",
 )
 async def delete_flight_strip(
-    flight_strip_id: str = Path(..., description="Flight strip ID"),
+    flight_strip_id: str = Path(..., description="Flight strip database ID"),
     use_case: FlightStripUseCase = Depends(get_flight_strip_use_case),
 ) -> FlightStripDeletedResponse:
     """Delete flight strip"""
 
     success = await use_case.delete_flight_strip(flight_strip_id)
 
-    return FlightStripDeletedResponse(deleted_id=flight_strip_id)
+    return FlightStripDeletedResponse(deleted_name=flight_strip_id)
+
+
+@router.get(
+    "/{flight_strip_id}",
+    response_model=FlightStripResponse,
+    summary="Get Flight Strip",
+    description="Get a specific flight strip by its database ID",
+)
+async def get_flight_strip(
+    flight_strip_id: str = Path(..., description="Flight strip database ID"),
+    use_case: FlightStripUseCase = Depends(get_flight_strip_use_case),
+) -> FlightStripResponse:
+    """Get flight strip by ID"""
+    
+    flight_strip = await use_case.get_flight_strip(flight_strip_id)
+    return FlightStripResponse.from_domain(flight_strip)
+
+
+@router.put(
+    "/{flight_strip_id}",
+    response_model=FlightStripUpdatedResponse,
+    summary="Update Flight Strip",
+    description="Update a flight strip by its database ID",
+)
+async def update_flight_strip(
+    request: UpdateFlightStripRequest,
+    flight_strip_id: str = Path(..., description="Flight strip database ID"),
+    use_case: FlightStripUseCase = Depends(get_flight_strip_use_case),
+) -> FlightStripUpdatedResponse:
+    """Update flight strip"""
+    
+    # Convert request to update fields
+    update_fields = {
+        k: v for k, v in request.model_dump().items() 
+        if v is not None
+    }
+    
+    updated_strip = await use_case.update_flight_strip(
+        flight_strip_id, **update_fields
+    )
+    
+    return FlightStripUpdatedResponse(
+        flight_strip=FlightStripResponse.from_domain(updated_strip)
+    )
 
 
 @router.get(
@@ -96,9 +138,6 @@ async def list_flight_strips(
     takeoff_time_end: Optional[str] = Query(
         None, description="Filter takeoff time to (HH:MM)"
     ),
-    limit: int = Query(
-        100, ge=1, le=1000, description="Maximum number of results"
-    ),
     offset: int = Query(0, ge=0, description="Number of results to skip"),
     use_case: FlightStripUseCase = Depends(get_flight_strip_use_case),
 ) -> FlightStripListResponse:
@@ -110,20 +149,17 @@ async def list_flight_strips(
             flight_area=flight_area,
             takeoff_time_start=takeoff_time_start,
             takeoff_time_end=takeoff_time_end,
-            limit=limit,
             offset=offset,
         )
     else:
         # List all
-        all_strips = await use_case.list_all_flight_strips()
-        flight_strips = all_strips[offset : offset + limit]
+        flight_strips = await use_case.list_all_flight_strips()
 
     return FlightStripListResponse(
         flight_strips=[
-            FlightStripResponse.model_validate(fs.model_dump())
+            FlightStripResponse.from_domain(fs)
             for fs in flight_strips
         ],
         total_count=len(flight_strips),
         offset=offset,
-        limit=limit,
     )
