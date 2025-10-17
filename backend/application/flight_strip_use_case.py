@@ -28,7 +28,9 @@ class FlightStripUseCase:
         """Create a new flight strip with business validation"""
         try:
             # Business rule: Check for duplicate names
-            existing = await self.repository.get_by_flight_name(flight_strip.name)
+            existing = await self.repository.get_by_flight_name(
+                flight_strip.name
+            )
             if existing:
                 raise ApiException(
                     status_code=HTTPStatus.CONFLICT,
@@ -92,12 +94,15 @@ class FlightStripUseCase:
     ) -> FlightStrip:
         """Retrieve flight strip by flight name"""
         try:
-            flight_strip = await self.repository.get_by_flight_name(flight_name)
+            flight_strip = await self.repository.get_by_flight_name(
+                flight_name
+            )
             if not flight_strip:
                 raise ApiException(
                     status_code=HTTPStatus.NOT_FOUND,
                     message=(
-                        f"Flight strip with flight name '{flight_name}' not found"
+                        f"Flight strip with flight name '{flight_name}' not"
+                        " found"
                     ),
                 )
 
@@ -107,7 +112,8 @@ class FlightStripUseCase:
             raise
         except Exception as e:
             logging.error(
-                f"Error retrieving flight strip by flight name {flight_name}: {e}"
+                "Error retrieving flight strip by flight name"
+                f" {flight_name}: {e}"
             )
             raise ApiException(
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
@@ -153,20 +159,22 @@ class FlightStripUseCase:
                 details=str(e),
             )
 
-    async def delete_flight_strip(self, flight_strip_id: str) -> bool:
+    async def delete_flight_strip(self, flight_strip_name: str) -> bool:
         """Delete flight strip"""
         try:
             # Check if flight strip exists
-            existing = await self.repository.get_by_id(flight_strip_id)
+            existing = await self.repository.get_by_flight_name(
+                flight_strip_name
+            )
             if not existing:
                 raise ApiException(
                     status_code=HTTPStatus.NOT_FOUND,
                     message=(
-                        f"Flight strip with ID '{flight_strip_id}' not found"
+                        f"Flight strip with ID '{flight_strip_name}' not found"
                     ),
                 )
 
-            success = await self.repository.delete(flight_strip_id)
+            success = await self.repository.delete(flight_strip_name)
 
             if success:
                 logging.info(
@@ -180,7 +188,7 @@ class FlightStripUseCase:
             raise
         except Exception as e:
             logging.error(
-                f"Error deleting flight strip {flight_strip_id}: {e}"
+                f"Error deleting flight strip {flight_strip_name}: {e}"
             )
             raise ApiException(
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR,

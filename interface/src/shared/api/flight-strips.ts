@@ -30,7 +30,7 @@ export const FlightStripsService = {
     return data.flight_strips.map(toUIFormat);
   },
 
-  delete: async (id: string): Promise<void> => {
-    await api.delete(`${RESOURCE_PATH}/${id}`);
+  delete: async (name: string): Promise<void> => {
+    await api.delete(`${RESOURCE_PATH}/${name}`);
   },
 };

@@ -62,20 +62,20 @@ async def create_flight_strip(
 
 
 @router.delete(
-    "/{flight_strip_id}",
+    "/{flight_strip_name}",
     response_model=FlightStripDeletedResponse,
     summary="Delete Flight Strip",
-    description="Delete a flight strip by its ID",
+    description="Delete a flight strip by its name",
 )
 async def delete_flight_strip(
-    flight_strip_id: str = Path(..., description="Flight strip database ID"),
+    flight_strip_name: str = Path(..., description="Flight strip database ID"),
     use_case: FlightStripUseCase = Depends(get_flight_strip_use_case),
 ) -> FlightStripDeletedResponse:
     """Delete flight strip"""
 
-    success = await use_case.delete_flight_strip(flight_strip_id)
+    success = await use_case.delete_flight_strip(flight_strip_name)
 
-    return FlightStripDeletedResponse(deleted_name=flight_strip_id)
+    return FlightStripDeletedResponse(deleted_name=flight_strip_name)
 
 
 @router.get(
@@ -89,7 +89,7 @@ async def get_flight_strip(
     use_case: FlightStripUseCase = Depends(get_flight_strip_use_case),
 ) -> FlightStripResponse:
     """Get flight strip by ID"""
-    
+
     flight_strip = await use_case.get_flight_strip(flight_strip_id)
     return FlightStripResponse.from_domain(flight_strip)
 
@@ -106,17 +106,16 @@ async def update_flight_strip(
     use_case: FlightStripUseCase = Depends(get_flight_strip_use_case),
 ) -> FlightStripUpdatedResponse:
     """Update flight strip"""
-    
+
     # Convert request to update fields
     update_fields = {
-        k: v for k, v in request.model_dump().items() 
-        if v is not None
+        k: v for k, v in request.model_dump().items() if v is not None
     }
-    
+
     updated_strip = await use_case.update_flight_strip(
         flight_strip_id, **update_fields
     )
-    
+
     return FlightStripUpdatedResponse(
         flight_strip=FlightStripResponse.from_domain(updated_strip)
     )
@@ -157,8 +156,7 @@ async def list_flight_strips(
 
     return FlightStripListResponse(
         flight_strips=[
-            FlightStripResponse.from_domain(fs)
-            for fs in flight_strips
+            FlightStripResponse.from_domain(fs) for fs in flight_strips
         ],
         total_count=len(flight_strips),
         offset=offset,

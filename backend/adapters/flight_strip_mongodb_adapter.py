@@ -133,16 +133,16 @@ class FlightStripMongoDBAdapter(FlightStripRepositoryPort):
             )
             raise
 
-    async def delete(self, flight_strip_id: str) -> bool:
+    async def delete(self, flight_strip_name: str) -> bool:
         """Delete flight strip by ID"""
         try:
             result = await self.collection.delete_one(
-                {"_id": ObjectId(flight_strip_id)}
+                {"name": flight_strip_name}
             )
             return result.deleted_count > 0
         except Exception as e:
             logging.error(
-                f"Error deleting flight strip {flight_strip_id}: {e}"
+                f"Error deleting flight strip {flight_strip_name}: {e}"
             )
             return False
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import type { FlightArea, FlightStripUI, toUIFormat } from "@/shared/model";
+import type { FlightArea, FlightStripUI } from "@/shared/model";
 import {
   Box,
   Typography,
@@ -118,9 +118,15 @@ export const SidebarPanel = () => {
     setAddDialogOpen(false);
   };
 
-  const handleRemoveStrip = (id: string) => {
-    setStrips(strips.filter((s) => s.id !== id));
-    setSnackbar({ open: true, message: `Strip ${id} has been removed` });
+  const handleRemoveStrip = async (name: string) => {
+    try {
+      await FlightStripsService.delete(name);
+      setStrips(strips.filter((s) => s.name !== name));
+      setSnackbar({ open: true, message: `Strip ${name} has been removed` });
+    } catch (error) {
+      console.error("Failed to remove flight strip:", error);
+      setSnackbar({ open: true, message: `Failed to remove strip ${name}` });
+    }
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -128,8 +134,8 @@ export const SidebarPanel = () => {
 
     if (over && active.id !== over.id) {
       setStrips((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
+        const oldIndex = items.findIndex((item) => item.name === active.id);
+        const newIndex = items.findIndex((item) => item.name === over.id);
 
         return arrayMove(items, oldIndex, newIndex);
       });
@@ -245,7 +251,7 @@ export const SidebarPanel = () => {
               onDragEnd={handleDragEnd}
             >
               <SortableContext
-                items={filteredStrips.map((s) => s.id)}
+                items={filteredStrips.map((s) => s.name)}
                 strategy={verticalListSortingStrategy}
               >
                 <Box
