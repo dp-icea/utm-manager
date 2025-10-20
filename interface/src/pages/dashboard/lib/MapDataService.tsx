@@ -169,10 +169,10 @@ export const MapDataService = () => {
       const fetchedVolumes: Array<
         OperationalIntent | Constraint | IdentificationServiceAreaFull
       > = [
-        ...res.constraints,
-        ...res.operational_intents,
-        ...res.identification_service_areas,
-      ];
+          ...res.constraints,
+          ...res.operational_intents,
+          ...res.identification_service_areas,
+        ];
 
       localVolumes.current = fetchedVolumes.slice();
       setVolumes(fetchedVolumes);
@@ -250,6 +250,8 @@ export const MapDataService = () => {
   };
 
   const triggerFetchVolumes = async () => {
+    return;
+
     if (!controller.current) return;
 
     setLoading(true);
@@ -284,27 +286,21 @@ export const MapDataService = () => {
   const onViewerStart: React.EffectCallback = () => {
     if (!viewer || controller.current) return;
 
-    console.log("=== On Viewer Start");
-
     controller.current = new MapEntityManager(viewer);
 
     timeRange.current = getTimeRange();
 
-    controller.current.addMoveEndCallback(() => {
-      if (constantVolumeFetch.current) {
-        clearInterval(constantVolumeFetch.current);
-      }
-      constantVolumeFetch.current = setInterval(() => {
-        triggerFetchVolumes();
-      }, VOLUME_FETCH_INTERVAL);
-    });
+    if (isLive) {
+      if (liveInterval.current) return;
 
-    if (constantVolumeFetch.current) {
-      clearInterval(constantVolumeFetch.current);
+      liveInterval.current = setInterval(() => {
+        const startTime = new Date();
+        const endTime = addSeconds(startTime, 10);
+        timeRange.current = { startTime, endTime };
+
+        triggerFetchFlights();
+      }, FLIGHT_FETCH_INTERVAL);
     }
-    constantVolumeFetch.current = setInterval(() => {
-      triggerFetchVolumes();
-    }, VOLUME_FETCH_INTERVAL);
 
     controller.current.addSelectedEntitiesChangeCallback(
       (entities: Set<Cesium.Entity>) => {
@@ -337,7 +333,7 @@ export const MapDataService = () => {
   const onInterfaceUpdate: React.EffectCallback = () => {
     if (!controller.current) return;
 
-    updateVolumes();
+    // updateVolumes();
     updateFlights();
   };
 

@@ -1,5 +1,5 @@
 import {
-  type FlightStrip,
+  type FlightStripUI,
   FLIGHT_AREA_COLORS,
   formatFlightArea,
 } from "@/shared/model";
@@ -13,8 +13,8 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
 interface FlightStripCardProps {
-  strip: FlightStrip;
-  onRemove: (id: string) => void;
+  strip: FlightStripUI;
+  onRemove: (name: string) => void;
 }
 
 const FlightStripCard = ({ strip, onRemove }: FlightStripCardProps) => {
@@ -25,7 +25,7 @@ const FlightStripCard = ({ strip, onRemove }: FlightStripCardProps) => {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: strip.id });
+  } = useSortable({ id: strip.name });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -100,7 +100,7 @@ const FlightStripCard = ({ strip, onRemove }: FlightStripCardProps) => {
               fontFamily="monospace"
               fontWeight="bold"
             >
-              {strip.id}
+              {strip.name}
             </Typography>
             <Chip
               label={formatFlightArea(strip.flightArea)}
@@ -115,7 +115,7 @@ const FlightStripCard = ({ strip, onRemove }: FlightStripCardProps) => {
           </Box>
           <IconButton
             size="small"
-            onClick={() => onRemove(strip.id)}
+            onClick={() => onRemove(strip.name)}
             className="remove-button"
             sx={{ opacity: 0, transition: "opacity 0.2s" }}
           >

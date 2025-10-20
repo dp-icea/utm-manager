@@ -63,7 +63,7 @@ export class MapEntityManager {
   private geoJsonEntities: Cesium.Entity[] = [];
   private selectedGeoJsonEntities: Set<Cesium.Entity> = new Set();
 
-  private onSelectedGeoJsonEntitiesChange: () => void = () => {};
+  private onSelectedGeoJsonEntitiesChange: () => void = () => { };
 
   constructor(viewer: Cesium.Viewer) {
     this.viewer = viewer;
@@ -112,6 +112,15 @@ export class MapEntityManager {
         this.deselectGeoJsonEntity(pickedEntity);
       } else {
         this.selectGeoJsonEntity(pickedEntity);
+      }
+    });
+
+    // Add ESC key to deselect all
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        this.selectedGeoJsonEntities.forEach((entity) => {
+          this.deselectGeoJsonEntity(entity);
+        });
       }
     });
   }
@@ -442,7 +451,7 @@ export class MapEntityManager {
           (entity) => entity.entityIds.length,
         ),
       ) +
-        Object.values(this.flights).flat().length
+      Object.values(this.flights).flat().length
     ) {
       this.viewer.entities.removeAll();
       this.displayedEntities = {};
