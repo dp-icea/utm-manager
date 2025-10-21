@@ -13,6 +13,11 @@ class Settings(BaseSettings):
     # MongoDB Configuration
     MONGODB_URL: str = "mongodb://localhost:27017"
     MONGODB_DATABASE: str = "flight_strips_db"
+    
+    # Event API Configuration
+    EVENT_API_URL: Optional[str] = None
+    EVENT_API_TIMEOUT: float = 5.0
+    EVENT_DISPATCH_ENABLED: bool = True
 
     class Config:
         env_file = f".env.{os.getenv('ENV', 'dev')}"

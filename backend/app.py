@@ -9,8 +9,15 @@ from routes.constraints import router as ConstraintsRouter
 from routes.health import router as HealthRouter
 from routes.flight_strips import router as FlightStripsRouter
 from infrastructure.mongodb_client import mongodb_client
+from infrastructure.event_service import EventService
+from config.config import Settings
+from config.event_mappings import get_event_stream_for_request
 from schemas.api import ApiException
 import logging
+
+# Global settings and event service instances
+settings = Settings()
+event_service = EventService(settings)
 
 
 @asynccontextmanager
@@ -24,6 +31,17 @@ async def lifespan(app: FastAPI):
         await mongodb_client.connect()
         await mongodb_client.create_indexes()
         logging.info("Application startup completed")
+
+        # Log event service configuration
+        if settings.EVENT_API_URL:
+            logging.info(
+                f"Event dispatching enabled to: {settings.EVENT_API_URL}"
+            )
+        else:
+            logging.warning(
+                "Event API URL not configured - events will not be dispatched"
+            )
+
     except Exception as e:
         logging.error(f"Failed to initialize application: {e}")
         raise
@@ -52,6 +70,48 @@ app = FastAPI(
 logging.basicConfig(
     level=logging.DEBUG,
 )
+
+
+@app.middleware("http")
+async def dispatch_events_middleware(request: Request, call_next):
+    """
+    Middleware to dispatch events to external event API based on route mappings
+    """
+    # Process the request first
+    response = await call_next(request)
+
+    # Only dispatch events for successful responses (2xx status codes)
+    if settings.EVENT_DISPATCH_ENABLED and 200 <= response.status_code < 300:
+        try:
+            # Get the event stream for this request
+            event_stream = get_event_stream_for_request(
+                method=request.method, path=request.url.path
+            )
+
+            if event_stream:
+                # Extract correlation ID from headers if available
+                correlation_id = request.headers.get("X-Correlation-ID", "")
+
+                # Dispatch event asynchronously (fire-and-forget)
+                event_service.dispatch_event_async(
+                    event_stream, correlation_id
+                )
+
+                logging.debug(
+                    f"Event dispatched: {event_stream} for"
+                    f" {request.method} {request.url.path}"
+                )
+            else:
+                logging.debug(
+                    "No event mapping found for"
+                    f" {request.method} {request.url.path}"
+                )
+
+        except Exception as e:
+            # Don't let event dispatch errors affect the main response
+            logging.error(f"Error in event dispatch middleware: {str(e)}")
+
+    return response
 
 
 @app.middleware("http")
@@ -86,14 +146,9 @@ async def catch_exceptions_middleware(request: Request, call_next):
         )
 
 
-origins = [
-    "http://localhost",
-    "http://localhost:8080",
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

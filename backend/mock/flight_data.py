@@ -1,21 +1,17 @@
 from pydantic import HttpUrl
-from schemas.common.geo import LatLngPoint, Volume4D
-from schemas.dss.remoteid import IdentificationServiceArea
+from domain.base import LatLngPoint, Volume4D
+from domain.external.dss.remoteid import IdentificationServiceArea
 from random import random, choice, randint
-from schemas.flights import (
-    Flight
-)
+from domain.flights import Flight
 from uuid import UUID, uuid4
-from schemas.common.base import (
-    Time
-)
-from schemas.common.enums import (
+from domain.base import Time
+from schemas.enums import (
     HorizontalAccuracy,
     RIDOperationalStatus,
     SpeedAccuracy,
     TimeFormat,
     UAType,
-    VerticalAccuracy
+    VerticalAccuracy,
 )
 from uuid import UUID
 from datetime import datetime
@@ -24,17 +20,25 @@ from typing import List
 from vnoise import Noise  # Perlin noise library
 import time
 
-from schemas.uss.remoteid import UASID, OperatingArea, RIDAircraftPosition, RIDAircraftState, RIDAuthData, RIDFlight, RIDFlightDetails
+from domain.external.uss.remoteid import (
+    UASID,
+    OperatingArea,
+    RIDAircraftPosition,
+    RIDAircraftState,
+    RIDAuthData,
+    RIDFlight,
+    RIDFlightDetails,
+)
 
 # In-memory storage for flight data
 flight_data_store = {}
 
 # Base coordinates for smooth variations
 BASE_COORDS = [
-    {"lat": -23.208718442978252, "lng": -45.87002908222274, "alt": 650.0},
-    {"lat": -23.208718442978252, "lng": -45.87002908222274, "alt": 650.0},
-    {"lat": -23.208718442978252, "lng": -45.87002908222274, "alt": 650.0},
-    {"lat": -23.208718442978252, "lng": -45.87002908222274, "alt": 650.0},
+    {"lat": -23.70102052860473, "lng": -46.69759097637771, "alt": 850.0},
+    {"lat": -23.70102052860473, "lng": -46.69759097637771, "alt": 850.0},
+    {"lat": -23.70102052860473, "lng": -46.69759097637771, "alt": 850.0},
+    {"lat": -23.70102052860473, "lng": -46.69759097637771, "alt": 850.0},
 ]
 
 # UUIDs for the flights
@@ -54,7 +58,8 @@ def generate_flight_mock_data() -> List[Flight]:
     t = time.time() * 0.05
 
     flights = []
-    for i in range(0, randint(1, 4)):
+    # for i in range(0, randint(1, 4)):
+    for i in range(0, 4):
         base = BASE_COORDS[i]
         uuid = FLIGHT_UUIDS[i]
 
@@ -93,15 +98,12 @@ def generate_flight_mock_data() -> List[Flight]:
             id=str(uuid),
             aircraft_type=UAType.Ornithopter,
             current_state=current_state,
-            operating_area=OperatingArea(
-                aircraft_count=1,
-                volumes=None
-            ),
+            operating_area=OperatingArea(aircraft_count=1, volumes=None),
             simulated=False,
             recent_positions=[],
             identification_service_area=IdentificationServiceArea(
                 id=str(uuid4()),
-                uss_base_url=HttpUrl("https://example.com/remoteid"),
+                uss_base_url="https://example.com/remoteid",
                 owner="Example Owner",
                 version="1.0",
                 time_end=Time(
@@ -127,7 +129,7 @@ def generate_flight_mock_data() -> List[Flight]:
                     format=0,
                     data="ExampleAuthData",
                 ),
-            )
+            ),
         )
 
         # Store in memory
