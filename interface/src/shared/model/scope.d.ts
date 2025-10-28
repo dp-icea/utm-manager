@@ -7,4 +7,6 @@ export enum Scope {
   ConformanceMonitoringSA = "utm.conformance_monitoring_sa",
   AvailabilityArbitration = "utm.availability_arbitration",
   AviationAuthority = "utm.aviation_authority",
+  DisplayProvider = "rid.display_provider",
+  ServiceProvider = "rid.service_provider",
 }

@@ -339,15 +339,6 @@ export const MapDataService = () => {
 
   const getFilteredFlights = (flights: Array<Flight>): Array<Flight> => {
     return flights.filter((flight) => {
-      // Filter by selected providers
-      if (
-        !flightProvidersFilter.includes(
-          flight.identification_service_area.owner,
-        )
-      ) {
-        return false;
-      }
-
       // Filter by selected flights
       if (!flightsFilter.includes(flight.id)) {
         return false;
@@ -362,8 +353,12 @@ export const MapDataService = () => {
 
     if (!isLive) return;
 
-    const filteredFlights = getFilteredFlights(flights);
-    controller.current.displayFlights(filteredFlights);
+    // console.log("=== Displaying Filtered Flights ===");
+    // console.log(flights);
+    // const filteredFlights = getFilteredFlights(flights);
+    // console.log("=== Displaying Filtered Flights ===");
+    // console.log(filteredFlights);
+    controller.current.displayFlights(flights);
   };
 
   const onFlightsUpdate: React.EffectCallback = () => {

@@ -5,6 +5,7 @@ from datetime import datetime
 import logging
 
 from domain.airspace import AirspaceAllocations, AirspaceFlights
+from mock.flight_data import generate_flight_mock_data
 from ports.airspace_port import (
     AirspaceDetailsDataPort,
     AirspaceReferencesDataPort,
@@ -70,7 +71,7 @@ class AirspaceQueryUseCase:
 
     async def get_active_flights(
         self, area: QueryFlightsRequest
-    ) -> List[Flight]:
+    ) -> AirspaceFlights:
         """Get active flights in a given area"""
 
         flights, errors = await self.flight_port.get_active_flights(area)
@@ -88,6 +89,7 @@ class AirspaceQueryUseCase:
         return AirspaceFlights(
             timestamp=datetime.now(),
             flights=flights,
+            # flights=generate_flight_mock_data(),
         )
 
     async def _get_constraint_details(self, references) -> List[Constraint]:
