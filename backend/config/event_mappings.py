@@ -31,34 +31,14 @@ class EventStream(str, Enum):
 # Using path patterns that match FastAPI route definitions
 ROUTE_EVENT_MAPPINGS: Dict[Tuple[str, str], str] = {
     # Airspace routes
-    (
-        "POST",
-        "/api/airspace/allocations",
-    ): EventStream.MANAGER_AIRSPACE_ALLOCATIONS,
     ("POST", "/api/airspace/flights"): EventStream.MANAGER_AIRSPACE_FLIGHTS,
-    # Constraint routes
-    ("POST", "/api/constraints/create"): EventStream.MANAGER_CONSTRAINT_CREATE,
-    (
-        "DELETE",
-        "/api/constraints/delete-in-area",
-    ): EventStream.MANAGER_CONSTRAINT_DELETE,
     # Flight Strip routes
     ("POST", "/api/flight-strips/"): EventStream.MANAGER_FLIGHT_STRIPS_CREATE,
     ("GET", "/api/flight-strips/"): EventStream.MANAGER_FLIGHT_STRIPS_LIST,
     (
-        "GET",
-        "/api/flight-strips/{flight_strip_id}",
-    ): EventStream.MANAGER_FLIGHT_STRIPS_FETCH,
-    (
-        "PUT",
-        "/api/flight-strips/{flight_strip_id}",
-    ): EventStream.MANAGER_FLIGHT_STRIPS_UPDATE,
-    (
         "DELETE",
         "/api/flight-strips/{flight_strip_name}",
     ): EventStream.MANAGER_FLIGHT_STRIPS_DELETE,
-    # Health routes
-    ("GET", "/api/healthy/"): EventStream.MANAGER_HEALTH_CHECK,
 }
 
 
