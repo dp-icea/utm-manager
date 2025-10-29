@@ -1,3 +1,4 @@
+import * as Cesium from "cesium";
 import { useState, type ReactNode } from "react";
 import { format } from "date-fns";
 import { MapState } from "@/shared/model";
@@ -31,6 +32,10 @@ export const MapProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingConstraintRequest, setLoadingConstraintRequest] =
     useState<boolean>(false);
+
+  const [sceneMode, setSceneMode] = useState<Cesium.SceneMode>(
+    Cesium.SceneMode.SCENE2D,
+  );
 
   const [filters, setFilters] = useState<FilterCategory[]>([
     {
@@ -91,6 +96,8 @@ export const MapProvider = ({ children }: { children: ReactNode }) => {
         setFlightsFilter,
         flightProvidersFilter,
         setFlightProvidersFilter,
+        sceneMode,
+        setSceneMode,
       }}
     >
       {children}

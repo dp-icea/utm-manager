@@ -1,19 +1,39 @@
-import { Wifi, WifiOff, AlertCircle, Loader2, Radio } from "lucide-react";
+import {
+  Wifi,
+  WifiOff,
+  AlertCircle,
+  Loader2,
+  Radio,
+  MapPin,
+  Map,
+  Globe,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import IconBRUTM from "@/shared/assets/logo.svg";
 import { ROUTES } from "@/shared/config";
 import { useAuth } from "@/shared/lib/hook";
 import { Box, Button, Typography, AppBar, Toolbar } from "@mui/material";
+import { useMap } from "@/shared/lib/map";
+import * as Cesium from "cesium";
 
 import LogoutIcon from "@mui/icons-material/Logout";
 
 export const Header = () => {
   const { logout } = useAuth();
+  const { sceneMode, setSceneMode } = useMap();
   const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
     navigate(ROUTES.LOGIN);
+  };
+
+  const toggleSceneMode = () => {
+    setSceneMode(
+      sceneMode === Cesium.SceneMode.SCENE3D
+        ? Cesium.SceneMode.SCENE2D
+        : Cesium.SceneMode.SCENE3D,
+    );
   };
 
   return (
@@ -33,6 +53,16 @@ export const Header = () => {
       </div>
 
       <div className="flex items-center space-x-4">
+        <Button
+          variant="text"
+          startIcon={
+            sceneMode === Cesium.SceneMode.SCENE3D ? <Globe /> : <Map />
+          }
+          onClick={toggleSceneMode}
+          color="inherit"
+        >
+          {sceneMode === Cesium.SceneMode.SCENE3D ? "3D Mode" : "2D Mode"}
+        </Button>
         <Button
           variant="text"
           startIcon={<LogoutIcon />}

@@ -69,6 +69,7 @@ export class MapEntityManager {
     this.viewer = viewer;
 
     this.viewer.cesiumWidget.creditContainer.remove();
+    this.viewer.scene.mode = Cesium.SceneMode.SCENE2D;
 
     const [latitude, longitude] = [-23.713416, -46.693356];
     const cameraAltitude = 5000;
@@ -123,6 +124,10 @@ export class MapEntityManager {
         });
       }
     });
+  }
+
+  setSceneMode(mode: Cesium.SceneMode) {
+    this.viewer.scene.mode = mode;
   }
 
   private selectGeoJsonEntity(entity: Cesium.Entity) {

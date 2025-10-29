@@ -78,6 +78,7 @@ export const MapDataService = () => {
     setFlights,
     flightsFilter,
     flightProvidersFilter,
+    sceneMode,
   } = useMap();
 
   const { activeStripIds, setActiveStripIds } = useStrips();
@@ -424,6 +425,12 @@ export const MapDataService = () => {
       controller.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    if (!controller.current) return;
+
+    controller.current.setSceneMode(sceneMode);
+  });
 
   return null;
 };
