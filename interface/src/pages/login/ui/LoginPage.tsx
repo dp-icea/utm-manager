@@ -1,8 +1,16 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-
+import { TextField } from "@mui/material";
 import { ROUTES } from "@/shared/config";
-import { Button, Input, Label, Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
+import {
+  Button,
+  Input,
+  Label,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/ui";
 import LogoBRUTM from "@/shared/assets/logo.svg";
 import { useToast, useAuth } from "@/shared/lib/hook";
 
@@ -74,40 +82,36 @@ export const LoginPage = () => {
             className="h-30 w-30 rounded-full"
           />
           <CardTitle className="text-2xl text-center text-white">
-            BR-UTM
+            BR-UTM Manager
           </CardTitle>
           <p className="text-sm text-center text-gray-400">
-            Sign in to access the monitoring system
+            Sign in to access the drone management system
           </p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username" className="text-gray-300">
-                Username
-              </Label>
-              <Input
-                id="username"
-                type="text"
+              <TextField
+                fullWidth
+                label="Username"
+                variant="outlined"
+                margin="normal"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter username"
                 required
-                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                autoFocus
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-gray-300">
-                Password
-              </Label>
-              <Input
-                id="password"
+              <TextField
+                fullWidth
+                label="Password"
                 type="password"
+                variant="outlined"
+                margin="normal"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter password"
                 required
-                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
               />
             </div>
             <Button

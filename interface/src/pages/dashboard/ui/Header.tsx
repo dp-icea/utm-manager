@@ -46,7 +46,7 @@ export const Header = () => {
             className="h-10 w-10 rounded-full"
           />
           <div className="flex flex-col items-start">
-            <p className="text-xl font-bold text-white">BR-UTM</p>
+            <p className="text-xl font-bold text-white">BR-UTM Manager</p>
             <p className="text-sm text-gray-300">UTM Traffic Control System</p>
           </div>
         </div>
