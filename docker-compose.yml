@@ -6,6 +6,10 @@ services:
     environment:
       ENV: "prod"
       AUTH_KEY: "${AUTH_KEY}"
+    logging:
+      driver: fluentd
+      options:
+        tag: flight-strips-manager-api
     deploy:
       replicas: 1
       restart_policy:
