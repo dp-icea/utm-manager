@@ -17,29 +17,44 @@ import { formatFlightArea } from "@/shared/model";
 import { FlightStripsService } from "@/shared/api";
 
 interface AddFlightStripFormProps {
-  onAdd: (strip: FlightStripUI) => void;
+  onAdd: (strip: FlightStripUI) => Promise<void>;
+  editStrip?: FlightStripUI;
+  onEdit?: (strip: FlightStripUI) => Promise<void>;
 }
 
-const AddFlightStripForm = ({ onAdd }: AddFlightStripFormProps) => {
+const AddFlightStripForm = ({
+  onAdd,
+  editStrip,
+  onEdit,
+}: AddFlightStripFormProps) => {
   const { activeStripIds } = useStrips();
 
-  const [loading, setLoading] = useState(false);
-  const [id, setId] = useState("");
+  const [id, setId] = useState(editStrip?.name || "");
   const [flightArea, setFlightArea] = useState<FlightArea>(
-    activeStripIds[0] || "red",
+    editStrip?.flightArea || activeStripIds[0] || "red",
   );
-  const [height, setHeight] = useState("");
-  const [takeoffSpace, setTakeoffSpace] = useState("");
-  const [landingSpace, setLandingSpace] = useState("");
-  const [takeoffTime, setTakeoffTime] = useState<Dayjs | null>(null);
-  const [landingTime, setLandingTime] = useState<Dayjs | null>(null);
+  const [height, setHeight] = useState(editStrip?.height.toString() || "");
+  const [takeoffSpace, setTakeoffSpace] = useState(
+    editStrip?.takeoffSpace || "",
+  );
+  const [landingSpace, setLandingSpace] = useState(
+    editStrip?.landingSpace || "",
+  );
+  const [takeoffTime, setTakeoffTime] = useState<Dayjs | null>(
+    editStrip?.takeoffTime ? dayjs(editStrip.takeoffTime, "HH:mm") : null,
+  );
+  const [landingTime, setLandingTime] = useState<Dayjs | null>(
+    editStrip?.landingTime ? dayjs(editStrip.landingTime, "HH:mm") : null,
+  );
+
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!takeoffTime || !landingTime) return;
 
-    const newStrip: FlightStripUI = {
+    const strip: FlightStripUI = {
       name: id,
       flightArea,
       height: Number(height),
@@ -51,8 +66,12 @@ const AddFlightStripForm = ({ onAdd }: AddFlightStripFormProps) => {
 
     try {
       setLoading(true);
-      await FlightStripsService.create(newStrip);
-      onAdd(newStrip);
+
+      if (editStrip && onEdit) {
+        await onEdit(strip);
+      } else {
+        await onAdd(strip);
+      }
 
       // Reset form
       setId("");
@@ -131,6 +150,7 @@ const AddFlightStripForm = ({ onAdd }: AddFlightStripFormProps) => {
         label="Takeoff Time"
         value={takeoffTime}
         onChange={(newValue) => setTakeoffTime(newValue)}
+        ampm={false}
         slotProps={{
           textField: {
             size: "small",
@@ -144,6 +164,7 @@ const AddFlightStripForm = ({ onAdd }: AddFlightStripFormProps) => {
         label="Landing Time"
         value={landingTime}
         onChange={(newValue) => setLandingTime(newValue)}
+        ampm={false}
         slotProps={{
           textField: {
             size: "small",
@@ -154,7 +175,7 @@ const AddFlightStripForm = ({ onAdd }: AddFlightStripFormProps) => {
       />
 
       <Button type="submit" variant="contained" fullWidth>
-        Add Strip
+        {editStrip ? "Save Changes" : "Add Flight Strip"}
       </Button>
     </Box>
   );

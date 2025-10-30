@@ -100,6 +100,10 @@ export const SidebarPanel = () => {
   const [snackbar, setSnackbar] = useState({ open: false, message: "" });
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
+
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingStrip, setEditingStrip] = useState<FlightStripUI | null>(null);
+
   const { activeStripIds, setActiveStripIds } = useStrips();
 
   const sensors = useSensors(
@@ -109,13 +113,19 @@ export const SidebarPanel = () => {
     }),
   );
 
-  const handleAddStrip = (strip: FlightStripUI) => {
-    setStrips([...strips, strip]);
-    setSnackbar({
-      open: true,
-      message: `Flight strip added: ${strip.name} - ${strip.flightArea} area`,
-    });
-    setAddDialogOpen(false);
+  const handleAddStrip = async (strip: FlightStripUI) => {
+    try {
+      await FlightStripsService.create(strip);
+      setStrips([...strips, strip]);
+      setSnackbar({
+        open: true,
+        message: `Flight strip added: ${strip.name} - ${strip.flightArea} area`,
+      });
+      setAddDialogOpen(false);
+    } catch (error) {
+      console.error("Failed to add flight strip:", error);
+      setSnackbar({ open: true, message: "Failed to add flight strip" });
+    }
   };
 
   const handleRemoveStrip = async (name: string) => {
@@ -127,6 +137,23 @@ export const SidebarPanel = () => {
       console.error("Failed to remove flight strip:", error);
       setSnackbar({ open: true, message: `Failed to remove strip ${name}` });
     }
+  };
+
+  const handleEditStrip = async (strip: FlightStripUI) => {
+    setEditingStrip(strip);
+    setEditDialogOpen(true);
+  };
+
+  const handleUpdateStrip = (updatedStrip: FlightStripUI) => {
+    setStrips(
+      strips.map((s) => (s.name === editingStrip?.name ? updatedStrip : s)),
+    );
+    setSnackbar({
+      open: true,
+      message: `Strip ${updatedStrip.name} updated successfully`,
+    });
+    setEditDialogOpen(false);
+    setEditingStrip(null);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -262,6 +289,7 @@ export const SidebarPanel = () => {
                       key={strip.name}
                       strip={strip}
                       onRemove={handleRemoveStrip}
+                      onEdit={handleEditStrip}
                     />
                   ))}
                 </Box>
@@ -321,6 +349,35 @@ export const SidebarPanel = () => {
             endTime={endTime}
             onEndTimeChange={setEndTime}
           />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={editDialogOpen}
+        onClose={() => setEditDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          Edit Flight Strip
+          <IconButton onClick={() => setEditDialogOpen(false)} size="small">
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          {editingStrip && (
+            <AddFlightStripForm
+              onAdd={handleAddStrip}
+              editStrip={editingStrip}
+              onEdit={handleUpdateStrip}
+            />
+          )}
         </DialogContent>
       </Dialog>
 

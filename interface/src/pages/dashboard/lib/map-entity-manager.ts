@@ -340,7 +340,7 @@ export class MapEntityManager {
 
         this.flights[id].push(entity);
 
-        if (newFlight.details?.uas_id) {
+        if (newFlight.details?.uas_id || newFlight.id) {
           const label = this.viewer.entities.add({
             position: Cesium.Cartesian3.fromDegrees(
               position.lng,
@@ -349,7 +349,7 @@ export class MapEntityManager {
               Cesium.Ellipsoid.WGS84,
             ),
             label: {
-              text: newFlight.details.uas_id.registration_id,
+              text: newFlight.details?.uas_id.registration_id || newFlight.id,
               font: "14px sans-serif",
               fillColor: Cesium.Color.BLACK,
               outlineColor: Cesium.Color.BLACK,

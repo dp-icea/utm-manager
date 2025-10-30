@@ -15,9 +15,10 @@ import { CSS } from "@dnd-kit/utilities";
 interface FlightStripCardProps {
   strip: FlightStripUI;
   onRemove: (name: string) => void;
+  onEdit: (strip: FlightStripUI) => void;
 }
 
-const FlightStripCard = ({ strip, onRemove }: FlightStripCardProps) => {
+const FlightStripCard = ({ strip, onRemove, onEdit }: FlightStripCardProps) => {
   const {
     attributes,
     listeners,
@@ -38,6 +39,7 @@ const FlightStripCard = ({ strip, onRemove }: FlightStripCardProps) => {
     <Box
       ref={setNodeRef}
       style={style}
+      onClick={() => onEdit(strip)}
       sx={{
         position: "relative",
         overflow: "hidden",
@@ -47,7 +49,7 @@ const FlightStripCard = ({ strip, onRemove }: FlightStripCardProps) => {
         bgcolor: "background.paper",
         transition: "all 0.2s",
         opacity: isDragging ? 0.5 : 1,
-        cursor: isDragging ? "grabbing" : "grab",
+        cursor: isDragging ? "grabbing" : "pointer",
         "&:hover": {
           borderColor: "primary.main",
           boxShadow: 2,
@@ -115,7 +117,10 @@ const FlightStripCard = ({ strip, onRemove }: FlightStripCardProps) => {
           </Box>
           <IconButton
             size="small"
-            onClick={() => onRemove(strip.name)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove(strip.name);
+            }}
             className="remove-button"
             sx={{ opacity: 0, transition: "opacity 0.2s" }}
           >
