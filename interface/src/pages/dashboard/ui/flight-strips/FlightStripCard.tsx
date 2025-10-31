@@ -1,9 +1,21 @@
+import { useState } from "react";
 import {
   type FlightStripUI,
   FLIGHT_AREA_COLORS,
   formatFlightArea,
 } from "@/shared/model";
-import { Box, IconButton, Typography, Chip } from "@mui/material";
+import {
+  Box,
+  IconButton,
+  Typography,
+  Chip,
+  Switch,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
@@ -16,9 +28,18 @@ interface FlightStripCardProps {
   strip: FlightStripUI;
   onRemove: (name: string) => void;
   onEdit: (strip: FlightStripUI) => void;
+  onToggleActive: (strip: FlightStripUI, active: boolean) => void;
 }
 
-const FlightStripCard = ({ strip, onRemove, onEdit }: FlightStripCardProps) => {
+const FlightStripCard = ({
+  strip,
+  onRemove,
+  onEdit,
+  onToggleActive,
+}: FlightStripCardProps) => {
+  const [activeDialogOpen, setActiveDialogOpen] = useState(false);
+  const [pendingActiveState, setPendingActiveState] = useState(false);
+
   const {
     attributes,
     listeners,
@@ -33,7 +54,16 @@ const FlightStripCard = ({ strip, onRemove, onEdit }: FlightStripCardProps) => {
     transition,
   };
 
-  console.log(FLIGHT_AREA_COLORS);
+  const handleToggleClick = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation();
+    setPendingActiveState(e.target.checked);
+    setActiveDialogOpen(true);
+  };
+
+  const handleConfirmToggle = () => {
+    onToggleActive(strip, pendingActiveState);
+    setActiveDialogOpen(false);
+  };
 
   return (
     <Box
@@ -114,18 +144,32 @@ const FlightStripCard = ({ strip, onRemove, onEdit }: FlightStripCardProps) => {
                 fontSize: "0.7rem",
               }}
             />
+            <Chip
+              label={strip.active ? "Active" : "Inactive"}
+              size="small"
+              color={strip.active ? "success" : "default"}
+              sx={{ fontSize: "0.65rem" }}
+            />
           </Box>
-          <IconButton
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              onRemove(strip.name);
-            }}
-            className="remove-button"
-            sx={{ opacity: 0, transition: "opacity 0.2s" }}
-          >
-            <CloseIcon fontSize="small" />
-          </IconButton>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            <Switch
+              checked={strip.active}
+              onChange={handleToggleClick}
+              size="small"
+              onClick={(e) => e.stopPropagation()}
+            />
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemove(strip.name);
+              }}
+              className="remove-button"
+              sx={{ opacity: 0, transition: "opacity 0.2s" }}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Box>
         </Box>
 
         <Box
@@ -136,67 +180,125 @@ const FlightStripCard = ({ strip, onRemove, onEdit }: FlightStripCardProps) => {
             fontSize: "0.875rem",
           }}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-            <ArrowUpwardIcon sx={{ fontSize: 14, color: "primary.main" }} />
-            <Typography variant="caption" color="text.secondary">
-              Takeoff:
-            </Typography>
-            <Typography variant="caption" fontFamily="monospace">
-              {strip.takeoffSpace}
-            </Typography>
-          </Box>
+          {strip.takeoffSpace && (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              <ArrowUpwardIcon sx={{ fontSize: 14, color: "primary.main" }} />
+              <Typography variant="caption" color="text.secondary">
+                Takeoff:
+              </Typography>
+              <Typography variant="caption" fontFamily="monospace">
+                {strip.takeoffSpace}
+              </Typography>
+            </Box>
+          )}
 
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-            <ArrowDownwardIcon sx={{ fontSize: 14, color: "primary.main" }} />
-            <Typography variant="caption" color="text.secondary">
-              Landing:
-            </Typography>
-            <Typography variant="caption" fontFamily="monospace">
-              {strip.landingSpace}
-            </Typography>
-          </Box>
+          {strip.landingSpace && (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              <ArrowDownwardIcon sx={{ fontSize: 14, color: "primary.main" }} />
+              <Typography variant="caption" color="text.secondary">
+                Landing:
+              </Typography>
+              <Typography variant="caption" fontFamily="monospace">
+                {strip.landingSpace}
+              </Typography>
+            </Box>
+          )}
 
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-            <AccessTimeIcon sx={{ fontSize: 14, color: "primary.main" }} />
-            <Typography variant="caption" color="text.secondary">
-              Depart:
-            </Typography>
-            <Typography variant="caption" fontFamily="monospace">
-              {strip.takeoffTime}
-            </Typography>
-          </Box>
+          {strip.takeoffTime && (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              <AccessTimeIcon sx={{ fontSize: 14, color: "primary.main" }} />
+              <Typography variant="caption" color="text.secondary">
+                Depart:
+              </Typography>
+              <Typography variant="caption" fontFamily="monospace">
+                {strip.takeoffTime}
+              </Typography>
+            </Box>
+          )}
 
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-            <AccessTimeIcon sx={{ fontSize: 14, color: "primary.main" }} />
-            <Typography variant="caption" color="text.secondary">
-              Arrive:
-            </Typography>
-            <Typography variant="caption" fontFamily="monospace">
-              {strip.landingTime}
-            </Typography>
-          </Box>
+          {strip.landingTime && (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              <AccessTimeIcon sx={{ fontSize: 14, color: "primary.main" }} />
+              <Typography variant="caption" color="text.secondary">
+                Arrive:
+              </Typography>
+              <Typography variant="caption" fontFamily="monospace">
+                {strip.landingTime}
+              </Typography>
+            </Box>
+          )}
 
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 0.5,
-              gridColumn: "span 2",
-            }}
-          >
-            <Typography variant="caption" color="text.secondary">
-              Height:
-            </Typography>
-            <Typography
-              variant="caption"
-              fontFamily="monospace"
-              fontWeight="bold"
+          {strip.height && (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 0.5,
+                gridColumn: "span 2",
+              }}
             >
-              {strip.height}m
-            </Typography>
-          </Box>
+              <Typography variant="caption" color="text.secondary">
+                Height:
+              </Typography>
+              <Typography
+                variant="caption"
+                fontFamily="monospace"
+                fontWeight="bold"
+              >
+                {strip.height}m
+              </Typography>
+            </Box>
+          )}
+
+          {strip.description && (
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 0.25,
+                gridColumn: "span 2",
+                mt: 0.5,
+              }}
+            >
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                fontWeight="bold"
+              >
+                Description:
+              </Typography>
+              <Typography variant="caption" sx={{ fontStyle: "italic" }}>
+                {strip.description}
+              </Typography>
+            </Box>
+          )}
         </Box>
       </Box>
+
+      <Dialog
+        open={activeDialogOpen}
+        onClose={() => setActiveDialogOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Confirm Status Change</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to mark this flight strip as{" "}
+            {pendingActiveState ? "active" : "inactive"}?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setActiveDialogOpen(false)}>Cancel</Button>
+          <Button
+            onClick={handleConfirmToggle}
+            variant="contained"
+            color="primary"
+          >
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

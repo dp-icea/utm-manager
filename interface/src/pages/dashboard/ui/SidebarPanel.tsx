@@ -37,62 +37,7 @@ import { areArraysEqual } from "@/shared/lib";
 import { FlightStripsService } from "@/shared/api";
 
 export const SidebarPanel = () => {
-  const [strips, setStrips] = useState<FlightStripUI[]>([
-    // {
-    //   id: "FL001",
-    //   flightArea: "red",
-    //   height: 100,
-    //   takeoffSpace: "A1",
-    //   landingSpace: "B2",
-    //   takeoffTime: "08:30",
-    //   landingTime: "10:15",
-    // },
-    // {
-    //   id: "FL002",
-    //   flightArea: "blue",
-    //   height: 150,
-    //   takeoffSpace: "A2",
-    //   landingSpace: "B3",
-    //   takeoffTime: "09:45",
-    //   landingTime: "11:30",
-    // },
-    // {
-    //   id: "FL003",
-    //   flightArea: "green",
-    //   height: 120,
-    //   takeoffSpace: "A3",
-    //   landingSpace: "B1",
-    //   takeoffTime: "10:20",
-    //   landingTime: "12:45",
-    // },
-    // {
-    //   id: "FL004",
-    //   flightArea: "yellow",
-    //   height: 180,
-    //   takeoffSpace: "A4",
-    //   landingSpace: "B4",
-    //   takeoffTime: "11:15",
-    //   landingTime: "13:20",
-    // },
-    // {
-    //   id: "FL005",
-    //   flightArea: "purple",
-    //   height: 90,
-    //   takeoffSpace: "A5",
-    //   landingSpace: "B5",
-    //   takeoffTime: "12:30",
-    //   landingTime: "14:45",
-    // },
-    // {
-    //   id: "FL006",
-    //   flightArea: "orange",
-    //   height: 160,
-    //   takeoffSpace: "A6",
-    //   landingSpace: "B6",
-    //   takeoffTime: "13:45",
-    //   landingTime: "15:30",
-    // },
-  ]);
+  const [strips, setStrips] = useState<FlightStripUI[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedColors, setSelectedColors] = useState<FlightArea[]>([]);
   const [startTime, setStartTime] = useState("");
@@ -103,6 +48,9 @@ export const SidebarPanel = () => {
 
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingStrip, setEditingStrip] = useState<FlightStripUI | null>(null);
+
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [stripToDelete, setStripToDelete] = useState<string | null>(null);
 
   const { activeStripIds, setActiveStripIds } = useStrips();
 
@@ -115,7 +63,7 @@ export const SidebarPanel = () => {
 
   const handleAddStrip = async (strip: FlightStripUI) => {
     try {
-      await FlightStripsService.create(strip);
+      // await FlightStripsService.create(strip);
       setStrips([...strips, strip]);
       setSnackbar({
         open: true,
@@ -128,11 +76,20 @@ export const SidebarPanel = () => {
     }
   };
 
-  const handleRemoveStrip = async (name: string) => {
+  const handleRemoveStrip = (name: string) => {
+    setStripToDelete(name);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async (name: string) => {
     try {
-      await FlightStripsService.delete(name);
-      setStrips(strips.filter((s) => s.name !== name));
-      setSnackbar({ open: true, message: `Strip ${name} has been removed` });
+      if (name) {
+        // await FlightStripsService.delete(name);
+        setStrips(strips.filter((s) => s.name !== name));
+        setSnackbar({ open: true, message: `Strip ${name} has been removed` });
+        setDeleteDialogOpen(false);
+        setStripToDelete(null);
+      }
     } catch (error) {
       console.error("Failed to remove flight strip:", error);
       setSnackbar({ open: true, message: `Failed to remove strip ${name}` });
@@ -156,6 +113,16 @@ export const SidebarPanel = () => {
     setEditingStrip(null);
   };
 
+  const handleToggleActive = (strip: FlightStripUI, active: boolean) => {
+    setStrips(
+      strips.map((s) => (s.name === strip.name ? { ...s, active } : s)),
+    );
+    setSnackbar({
+      open: true,
+      message: `Strip ${strip.name} marked as ${active ? "active" : "inactive"}`,
+    });
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
@@ -176,10 +143,10 @@ export const SidebarPanel = () => {
     ) {
       return false;
     }
-    if (startTime && strip.takeoffTime < startTime) {
+    if (startTime && strip.takeoffTime && strip.takeoffTime < startTime) {
       return false;
     }
-    if (endTime && strip.landingTime > endTime) {
+    if (endTime && strip.landingTime && strip.landingTime > endTime) {
       return false;
     }
     return true;
@@ -290,6 +257,7 @@ export const SidebarPanel = () => {
                       strip={strip}
                       onRemove={handleRemoveStrip}
                       onEdit={handleEditStrip}
+                      onToggleActive={handleToggleActive}
                     />
                   ))}
                 </Box>
@@ -378,6 +346,33 @@ export const SidebarPanel = () => {
               onEdit={handleUpdateStrip}
             />
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete flight strip {stripToDelete}? This
+            action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogContent
+          sx={{ display: "flex", justifyContent: "flex-end", gap: 1, pt: 0 }}
+        >
+          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+          <Button
+            onClick={() => handleConfirmDelete(stripToDelete!)}
+            variant="contained"
+            color="error"
+          >
+            Delete
+          </Button>
         </DialogContent>
       </Dialog>
 

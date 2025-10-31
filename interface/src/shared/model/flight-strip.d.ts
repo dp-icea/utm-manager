@@ -32,11 +32,13 @@ export function formatFlightArea(area: FlightArea): string {
 export interface FlightStrip {
   name: string;
   flight_area: FlightArea; // Changed to match backend snake_case
-  height: number;
-  takeoff_space: string; // Changed to match backend snake_case
-  landing_space: string; // Changed to match backend snake_case
-  takeoff_time: string; // Changed to match backend snake_case
-  landing_time: string; // Changed to match backend snake_case
+  height?: number;
+  takeoff_space?: string; // Changed to match backend snake_case
+  landing_space?: string; // Changed to match backend snake_case
+  takeoff_time?: string; // Changed to match backend snake_case
+  landing_time?: string; // Changed to match backend snake_case
+  description?: string;
+  active: boolean;
   created_at: string; // Added timestamp fields from backend
   updated_at: string;
 }
@@ -45,11 +47,13 @@ export interface FlightStrip {
 export interface FlightStripUI {
   name: string;
   flightArea: FlightArea;
-  height: number;
-  takeoffSpace: string;
-  landingSpace: string;
-  takeoffTime: string;
-  landingTime: string;
+  height?: number;
+  takeoffSpace?: string;
+  landingSpace?: string;
+  takeoffTime?: string;
+  landingTime?: string;
+  description?: string;
+  active: boolean;
 }
 
 // Conversion functions between backend and UI formats
@@ -62,6 +66,8 @@ export function toUIFormat(strip: FlightStrip): FlightStripUI {
     landingSpace: strip.landing_space,
     takeoffTime: strip.takeoff_time,
     landingTime: strip.landing_time,
+    description: strip.description,
+    active: strip.active,
   };
 }
 
@@ -76,6 +82,8 @@ export function toBackendFormat(
     landing_space: strip.landingSpace,
     takeoff_time: strip.takeoffTime,
     landing_time: strip.landingTime,
+    description: strip.description,
+    active: strip.active,
   };
 }
 

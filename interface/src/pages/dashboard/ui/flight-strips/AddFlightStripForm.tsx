@@ -33,13 +33,14 @@ const AddFlightStripForm = ({
   const [flightArea, setFlightArea] = useState<FlightArea>(
     editStrip?.flightArea || activeStripIds[0] || "red",
   );
-  const [height, setHeight] = useState(editStrip?.height.toString() || "");
+  const [height, setHeight] = useState(editStrip?.height?.toString() || "");
   const [takeoffSpace, setTakeoffSpace] = useState(
     editStrip?.takeoffSpace || "",
   );
   const [landingSpace, setLandingSpace] = useState(
     editStrip?.landingSpace || "",
   );
+  const [description, setDescription] = useState(editStrip?.description || "");
   const [takeoffTime, setTakeoffTime] = useState<Dayjs | null>(
     editStrip?.takeoffTime ? dayjs(editStrip.takeoffTime, "HH:mm") : null,
   );
@@ -52,16 +53,16 @@ const AddFlightStripForm = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!takeoffTime || !landingTime) return;
-
     const strip: FlightStripUI = {
       name: id,
       flightArea,
-      height: Number(height),
-      takeoffSpace,
-      landingSpace,
-      takeoffTime: takeoffTime.format("HH:mm"),
-      landingTime: landingTime.format("HH:mm"),
+      ...(height && { height: Number(height) }),
+      ...(takeoffSpace && { takeoffSpace }),
+      ...(landingSpace && { landingSpace }),
+      ...(takeoffTime && { takeoffTime: takeoffTime.format("HH:mm") }),
+      ...(landingTime && { landingTime: landingTime.format("HH:mm") }),
+      ...(description && { description }),
+      active: editStrip?.active ?? false,
     };
 
     try {
@@ -79,6 +80,7 @@ const AddFlightStripForm = ({
       setHeight("");
       setTakeoffSpace("");
       setLandingSpace("");
+      setDescription("");
       setTakeoffTime(null);
       setLandingTime(null);
     } catch (error) {
@@ -125,7 +127,6 @@ const AddFlightStripForm = ({
         fullWidth
         value={height}
         onChange={(e) => setHeight(e.target.value)}
-        required
       />
 
       <TextField
@@ -134,7 +135,6 @@ const AddFlightStripForm = ({
         fullWidth
         value={takeoffSpace}
         onChange={(e) => setTakeoffSpace(e.target.value)}
-        required
       />
 
       <TextField
@@ -143,7 +143,6 @@ const AddFlightStripForm = ({
         fullWidth
         value={landingSpace}
         onChange={(e) => setLandingSpace(e.target.value)}
-        required
       />
 
       <TimePicker
@@ -155,7 +154,6 @@ const AddFlightStripForm = ({
           textField: {
             size: "small",
             fullWidth: true,
-            required: true,
           },
         }}
       />
@@ -169,7 +167,6 @@ const AddFlightStripForm = ({
           textField: {
             size: "small",
             fullWidth: true,
-            required: true,
           },
         }}
       />
