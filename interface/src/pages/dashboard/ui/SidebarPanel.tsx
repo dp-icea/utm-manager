@@ -9,6 +9,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  DialogActions,
   IconButton,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
@@ -52,6 +53,12 @@ export const SidebarPanel = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [stripToDelete, setStripToDelete] = useState<string | null>(null);
 
+  const [toggleDialogOpen, setActiveDialogOpen] = useState(false);
+  const [pendingActiveState, setPendingActiveState] = useState<boolean>(false);
+  const [stripToToggle, setStripToToggle] = useState<FlightStripUI | null>(
+    null,
+  );
+
   const { activeStripIds, setActiveStripIds } = useStrips();
 
   const sensors = useSensors(
@@ -81,6 +88,34 @@ export const SidebarPanel = () => {
     setDeleteDialogOpen(true);
   };
 
+  const handleToggleStrip = (strip: FlightStripUI) => {
+    setStripToToggle(strip);
+    setPendingActiveState(!strip.active);
+    setActiveDialogOpen(true);
+  };
+
+  const handleConfirmToggle = async () => {
+    try {
+      if (stripToToggle) {
+        const updatedStrip = { ...stripToToggle, active: pendingActiveState };
+        // await FlightStripsService.update(updatedStrip);
+        setStrips(
+          strips.map((s) => (s.name === updatedStrip.name ? updatedStrip : s)),
+        );
+        setSnackbar({
+          open: true,
+          message: `Strip ${updatedStrip.name} marked as ${updatedStrip.active ? "active" : "inactive"
+            }`,
+        });
+        setActiveDialogOpen(false);
+        setStripToToggle(null);
+      }
+    } catch (error) {
+      console.error("Failed to update flight strip status:", error);
+      setSnackbar({ open: true, message: "Failed to update flight strip" });
+    }
+  };
+
   const handleConfirmDelete = async (name: string) => {
     try {
       if (name) {
@@ -101,7 +136,7 @@ export const SidebarPanel = () => {
     setEditDialogOpen(true);
   };
 
-  const handleUpdateStrip = (updatedStrip: FlightStripUI) => {
+  const handleUpdateStrip = async (updatedStrip: FlightStripUI) => {
     setStrips(
       strips.map((s) => (s.name === editingStrip?.name ? updatedStrip : s)),
     );
@@ -111,16 +146,6 @@ export const SidebarPanel = () => {
     });
     setEditDialogOpen(false);
     setEditingStrip(null);
-  };
-
-  const handleToggleActive = (strip: FlightStripUI, active: boolean) => {
-    setStrips(
-      strips.map((s) => (s.name === strip.name ? { ...s, active } : s)),
-    );
-    setSnackbar({
-      open: true,
-      message: `Strip ${strip.name} marked as ${active ? "active" : "inactive"}`,
-    });
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -257,7 +282,7 @@ export const SidebarPanel = () => {
                       strip={strip}
                       onRemove={handleRemoveStrip}
                       onEdit={handleEditStrip}
-                      onToggleActive={handleToggleActive}
+                      onToggle={handleToggleStrip}
                     />
                   ))}
                 </Box>
@@ -374,6 +399,31 @@ export const SidebarPanel = () => {
             Delete
           </Button>
         </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={toggleDialogOpen}
+        onClose={() => setActiveDialogOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Confirm Status Change</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to mark this flight strip as{" "}
+            {pendingActiveState ? "active" : "inactive"}?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setActiveDialogOpen(false)}>Cancel</Button>
+          <Button
+            onClick={handleConfirmToggle}
+            variant="contained"
+            color="primary"
+          >
+            Confirm
+          </Button>
+        </DialogActions>
       </Dialog>
 
       <Snackbar

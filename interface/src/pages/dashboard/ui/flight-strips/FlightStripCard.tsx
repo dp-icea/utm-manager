@@ -28,18 +28,15 @@ interface FlightStripCardProps {
   strip: FlightStripUI;
   onRemove: (name: string) => void;
   onEdit: (strip: FlightStripUI) => void;
-  onToggleActive: (strip: FlightStripUI, active: boolean) => void;
+  onToggle: (strip: FlightStripUI, active: boolean) => void;
 }
 
 const FlightStripCard = ({
   strip,
   onRemove,
   onEdit,
-  onToggleActive,
+  onToggle,
 }: FlightStripCardProps) => {
-  const [activeDialogOpen, setActiveDialogOpen] = useState(false);
-  const [pendingActiveState, setPendingActiveState] = useState(false);
-
   const {
     attributes,
     listeners,
@@ -52,17 +49,6 @@ const FlightStripCard = ({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-  };
-
-  const handleToggleClick = (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.stopPropagation();
-    setPendingActiveState(e.target.checked);
-    setActiveDialogOpen(true);
-  };
-
-  const handleConfirmToggle = () => {
-    onToggleActive(strip, pendingActiveState);
-    setActiveDialogOpen(false);
   };
 
   return (
@@ -78,7 +64,7 @@ const FlightStripCard = ({
         borderColor: "divider",
         bgcolor: "background.paper",
         transition: "all 0.2s",
-        opacity: isDragging ? 0.5 : 1,
+        opacity: isDragging ? 0.5 : strip.active ? 1 : 0.6,
         cursor: isDragging ? "grabbing" : "pointer",
         "&:hover": {
           borderColor: "primary.main",
@@ -144,18 +130,14 @@ const FlightStripCard = ({
                 fontSize: "0.7rem",
               }}
             />
-            <Chip
-              label={strip.active ? "Active" : "Inactive"}
-              size="small"
-              color={strip.active ? "success" : "default"}
-              sx={{ fontSize: "0.65rem" }}
-            />
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
             <Switch
               checked={strip.active}
-              onChange={handleToggleClick}
-              size="small"
+              onChange={(e) => {
+                e.stopPropagation();
+                onToggle(strip, e.target.checked);
+              }}
               onClick={(e) => e.stopPropagation()}
             />
             <IconButton
@@ -274,31 +256,6 @@ const FlightStripCard = ({
           )}
         </Box>
       </Box>
-
-      <Dialog
-        open={activeDialogOpen}
-        onClose={() => setActiveDialogOpen(false)}
-        maxWidth="xs"
-        fullWidth
-      >
-        <DialogTitle>Confirm Status Change</DialogTitle>
-        <DialogContent>
-          <Typography>
-            Are you sure you want to mark this flight strip as{" "}
-            {pendingActiveState ? "active" : "inactive"}?
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setActiveDialogOpen(false)}>Cancel</Button>
-          <Button
-            onClick={handleConfirmToggle}
-            variant="contained"
-            color="primary"
-          >
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 };

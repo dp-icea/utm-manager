@@ -103,6 +103,7 @@ const AddFlightStripForm = ({
         value={id}
         onChange={(e) => setId(e.target.value)}
         required
+        disabled={!!editStrip}
       />
 
       <FormControl size="small" fullWidth required>
@@ -143,6 +144,17 @@ const AddFlightStripForm = ({
         fullWidth
         value={landingSpace}
         onChange={(e) => setLandingSpace(e.target.value)}
+      />
+
+      <TextField
+        label="Description"
+        size="small"
+        fullWidth
+        multiline
+        rows={2}
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        placeholder="Add a comment or note..."
       />
 
       <TimePicker
