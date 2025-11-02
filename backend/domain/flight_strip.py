@@ -24,11 +24,13 @@ class FlightStrip(BaseModel):
     # Call sign field (required by existing MongoDB index, auto-generated from name)
     call_sign: Optional[str] = Field(None, description="Call sign for MongoDB compatibility")
     flight_area: FlightArea = Field(..., description="Flight area color zone")
-    height: int = Field(..., gt=0, description="Flight height in meters")
-    takeoff_space: str = Field(..., description="Takeoff space identifier")
-    landing_space: str = Field(..., description="Landing space identifier")
-    takeoff_time: str = Field(..., description="Takeoff time in HH:MM format")
-    landing_time: str = Field(..., description="Landing time in HH:MM format")
+    height: Optional[int] = Field(None, gt=0, description="Flight height in meters")
+    takeoff_space: Optional[str] = Field(None, description="Takeoff space identifier")
+    landing_space: Optional[str] = Field(None, description="Landing space identifier")
+    takeoff_time: Optional[str] = Field(None, description="Takeoff time in HH:MM format")
+    landing_time: Optional[str] = Field(None, description="Landing time in HH:MM format")
+    description: Optional[str] = Field(None, description="Flight strip description")
+    active: bool = Field(default=True, description="Whether the flight strip is active")
     
     # Timestamps for tracking
     created_at: datetime = Field(default_factory=datetime.utcnow)

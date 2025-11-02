@@ -122,18 +122,16 @@ class FlightStripUseCase:
             )
 
     async def update_flight_strip(
-        self, flight_strip_id: str, **update_fields
+        self, flight_name: str, **update_fields
     ) -> FlightStrip:
         """Update existing flight strip with business validation"""
         try:
             # Ensure the flight strip exists
-            existing = await self.repository.get_by_id(flight_strip_id)
+            existing = await self.repository.get_by_flight_name(flight_name)
             if not existing:
                 raise ApiException(
                     status_code=HTTPStatus.NOT_FOUND,
-                    message=(
-                        f"Flight strip with ID '{flight_strip_id}' not found"
-                    ),
+                    message=f"Flight strip with ID '{flight_name}' not found",
                 )
 
             # Update fields using domain logic
@@ -150,9 +148,7 @@ class FlightStripUseCase:
         except ApiException:
             raise
         except Exception as e:
-            logging.error(
-                f"Error updating flight strip {flight_strip_id}: {e}"
-            )
+            logging.error(f"Error updating flight strip {flight_name}: {e}")
             raise ApiException(
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
                 message="Failed to update flight strip",

@@ -52,6 +52,8 @@ async def create_flight_strip(
         landing_space=request.landing_space,
         takeoff_time=request.takeoff_time,
         landing_time=request.landing_time,
+        description=request.description,
+        active=request.active,
     )
 
     created_strip = await use_case.create_flight_strip(flight_strip)
@@ -95,14 +97,14 @@ async def get_flight_strip(
 
 
 @router.put(
-    "/{flight_strip_id}",
+    "/{flight_strip_name}",
     response_model=FlightStripUpdatedResponse,
     summary="Update Flight Strip",
     description="Update a flight strip by its database ID",
 )
 async def update_flight_strip(
     request: UpdateFlightStripRequest,
-    flight_strip_id: str = Path(..., description="Flight strip database ID"),
+    flight_strip_name: str = Path(..., description="Flight strip database ID"),
     use_case: FlightStripUseCase = Depends(get_flight_strip_use_case),
 ) -> FlightStripUpdatedResponse:
     """Update flight strip"""
@@ -113,7 +115,7 @@ async def update_flight_strip(
     }
 
     updated_strip = await use_case.update_flight_strip(
-        flight_strip_id, **update_fields
+        flight_strip_name, **update_fields
     )
 
     return FlightStripUpdatedResponse(

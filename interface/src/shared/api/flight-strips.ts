@@ -30,6 +30,12 @@ export const FlightStripsService = {
     return data.flight_strips.map(toUIFormat);
   },
 
+  update: async (strip: FlightStripUI): Promise<FlightStripUI> => {
+    const backendData = toBackendFormat(strip);
+    const res = await api.put(`${RESOURCE_PATH}/${strip.name}`, backendData);
+    return toUIFormat(res.data.flight_strip);
+  },
+
   delete: async (name: string): Promise<void> => {
     await api.delete(`${RESOURCE_PATH}/${name}`);
   },

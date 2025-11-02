@@ -3,11 +3,13 @@ import type { FlightStrip } from "@/shared/model";
 export interface CreateFlightStripRequest {
   name: string;
   flight_area: string;
-  height: number;
-  takeoff_space: string;
-  landing_space: string;
-  takeoff_time: string;
-  landing_time: string;
+  height?: number;
+  takeoff_space?: string;
+  landing_space?: string;
+  takeoff_time?: string;
+  landing_time?: string;
+  description?: string;
+  active: boolean;
 }
 
 export interface FlightStripListResponse {

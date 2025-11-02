@@ -90,30 +90,26 @@ export const LoginPage = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2">
-              <TextField
-                fullWidth
-                label="Username"
-                variant="outlined"
-                margin="normal"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                autoFocus
-              />
-            </div>
-            <div className="space-y-2">
-              <TextField
-                fullWidth
-                label="Password"
-                type="password"
-                variant="outlined"
-                margin="normal"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
+            <TextField
+              fullWidth
+              label="Username"
+              variant="outlined"
+              margin="normal"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              autoFocus
+            />
+            <TextField
+              fullWidth
+              label="Password"
+              type="password"
+              variant="outlined"
+              margin="normal"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
             <Button
               type="submit"
               className="w-full bg-blue-600 hover:bg-blue-700 text-white"

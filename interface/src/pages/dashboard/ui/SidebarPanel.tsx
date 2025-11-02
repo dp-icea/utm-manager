@@ -70,7 +70,7 @@ export const SidebarPanel = () => {
 
   const handleAddStrip = async (strip: FlightStripUI) => {
     try {
-      // await FlightStripsService.create(strip);
+      await FlightStripsService.create(strip);
       setStrips([...strips, strip]);
       setSnackbar({
         open: true,
@@ -98,7 +98,7 @@ export const SidebarPanel = () => {
     try {
       if (stripToToggle) {
         const updatedStrip = { ...stripToToggle, active: pendingActiveState };
-        // await FlightStripsService.update(updatedStrip);
+        await FlightStripsService.update(updatedStrip);
         setStrips(
           strips.map((s) => (s.name === updatedStrip.name ? updatedStrip : s)),
         );
@@ -119,7 +119,7 @@ export const SidebarPanel = () => {
   const handleConfirmDelete = async (name: string) => {
     try {
       if (name) {
-        // await FlightStripsService.delete(name);
+        await FlightStripsService.delete(name);
         setStrips(strips.filter((s) => s.name !== name));
         setSnackbar({ open: true, message: `Strip ${name} has been removed` });
         setDeleteDialogOpen(false);
@@ -137,15 +137,21 @@ export const SidebarPanel = () => {
   };
 
   const handleUpdateStrip = async (updatedStrip: FlightStripUI) => {
-    setStrips(
-      strips.map((s) => (s.name === editingStrip?.name ? updatedStrip : s)),
-    );
-    setSnackbar({
-      open: true,
-      message: `Strip ${updatedStrip.name} updated successfully`,
-    });
-    setEditDialogOpen(false);
-    setEditingStrip(null);
+    try {
+      await FlightStripsService.update(updatedStrip);
+      setStrips(
+        strips.map((s) => (s.name === editingStrip?.name ? updatedStrip : s)),
+      );
+      setSnackbar({
+        open: true,
+        message: `Strip ${updatedStrip.name} updated successfully`,
+      });
+      setEditDialogOpen(false);
+      setEditingStrip(null);
+    } catch (error) {
+      console.error("Failed to update flight strip:", error);
+      setSnackbar({ open: true, message: "Failed to update flight strip" });
+    }
   };
 
   const handleDragEnd = (event: DragEndEvent) => {

@@ -65,6 +65,7 @@ const FlightStripFilters = ({
         onChange={(newValue) =>
           onStartTimeChange(newValue ? newValue.format("HH:mm") : "")
         }
+        ampm={false}
         slotProps={{
           textField: {
             size: "small",
@@ -79,6 +80,7 @@ const FlightStripFilters = ({
         onChange={(newValue) =>
           onEndTimeChange(newValue ? newValue.format("HH:mm") : "")
         }
+        ampm={false}
         slotProps={{
           textField: {
             size: "small",

@@ -34,31 +34,37 @@ async def test_flight_strips():
         
         test_strips = [
             FlightStrip(
-                id="FL001",
+                name="FL001",
                 flight_area=FlightArea.RED,
                 height=100,
                 takeoff_space="A1",
                 landing_space="B2",
                 takeoff_time="08:30",
-                landing_time="10:15"
+                landing_time="10:15",
+                description="Test flight strip 1",
+                active=True
             ),
             FlightStrip(
-                id="FL002",
+                name="FL002",
                 flight_area=FlightArea.BLUE,
                 height=150,
                 takeoff_space="A2",
                 landing_space="B3",
                 takeoff_time="09:45",
-                landing_time="11:30"
+                landing_time="11:30",
+                description="Test flight strip 2",
+                active=True
             ),
             FlightStrip(
-                id="FL003",
+                name="FL003",
                 flight_area=FlightArea.GREEN,
                 height=120,
                 takeoff_space="A3",
                 landing_space="B1",
                 takeoff_time="10:20",
-                landing_time="12:45"
+                landing_time="12:45",
+                description="Test flight strip 3",
+                active=False
             )
         ]
         

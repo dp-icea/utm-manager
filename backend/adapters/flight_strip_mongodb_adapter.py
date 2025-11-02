@@ -117,12 +117,12 @@ class FlightStripMongoDBAdapter(FlightStripRepositoryPort):
             doc = self._to_document(flight_strip)
 
             result = await self.collection.replace_one(
-                {"_id": ObjectId(flight_strip.id)}, doc
+                {"name": flight_strip.name}, doc
             )
 
             if result.matched_count == 0:
                 raise ValueError(
-                    f"Flight strip with ID {flight_strip.id} not found"
+                    f"Flight strip with ID {flight_strip.name} not found"
                 )
 
             return flight_strip
