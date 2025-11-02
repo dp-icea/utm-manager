@@ -1,13 +1,4 @@
-import {
-  Wifi,
-  WifiOff,
-  AlertCircle,
-  Loader2,
-  Radio,
-  MapPin,
-  Map,
-  Globe,
-} from "lucide-react";
+import { Map, Globe } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import IconBRUTM from "@/shared/assets/logo.svg";
 import { ROUTES } from "@/shared/config";
@@ -17,6 +8,7 @@ import { useMap } from "@/shared/lib/map";
 import * as Cesium from "cesium";
 
 import LogoutIcon from "@mui/icons-material/Logout";
+import SettingsIcon from "@mui/icons-material/Settings";
 
 export const Header = () => {
   const { logout } = useAuth();
@@ -52,9 +44,17 @@ export const Header = () => {
         </div>
       </div>
 
-      <div className="flex items-center space-x-4">
+      <Box sx={{ display: "flex", gap: 2 }}>
         <Button
-          variant="text"
+          variant="outlined"
+          startIcon={<SettingsIcon />}
+          onClick={() => navigate("/drone-mapping")}
+          color="inherit"
+        >
+          Drone Mapping
+        </Button>
+        <Button
+          variant="outlined"
           startIcon={
             sceneMode === Cesium.SceneMode.SCENE3D ? <Globe /> : <Map />
           }
@@ -71,7 +71,7 @@ export const Header = () => {
         >
           Logout
         </Button>
-      </div>
+      </Box>
     </header>
   );
 };
