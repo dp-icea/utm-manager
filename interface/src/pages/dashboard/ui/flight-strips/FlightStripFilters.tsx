@@ -1,9 +1,18 @@
-import { Box, Autocomplete, TextField, Chip } from "@mui/material";
+import {
+  Box,
+  Autocomplete,
+  Select,
+  MenuItem,
+  TextField,
+  Chip,
+} from "@mui/material";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { FLIGHT_AREA_LABELS, FLIGHT_AREAS } from "@/shared/model";
 
 import type { FlightArea } from "@/shared/model";
 import dayjs, { Dayjs } from "dayjs";
+
+type ActiveFilter = "all" | "active" | "inactive";
 
 interface FlightStripFiltersProps {
   selectedColors: FlightArea[];
@@ -12,6 +21,8 @@ interface FlightStripFiltersProps {
   onStartTimeChange: (time: string) => void;
   endTime: string;
   onEndTimeChange: (time: string) => void;
+  activeFilter: ActiveFilter;
+  onActiveFilterChange: (filter: ActiveFilter) => void;
 }
 
 const parseTimeString = (timeStr: string): Dayjs | null => {
@@ -26,6 +37,8 @@ const FlightStripFilters = ({
   onStartTimeChange,
   endTime,
   onEndTimeChange,
+  activeFilter,
+  onActiveFilterChange,
 }: FlightStripFiltersProps) => {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}>
@@ -58,6 +71,17 @@ const FlightStripFilters = ({
           />
         )}
       />
+
+      <Select
+        value={activeFilter}
+        label="Status"
+        size="small"
+        onChange={(e) => onActiveFilterChange(e.target.value as ActiveFilter)}
+      >
+        <MenuItem value="all">All</MenuItem>
+        <MenuItem value="active">Active Only</MenuItem>
+        <MenuItem value="inactive">Inactive Only</MenuItem>
+      </Select>
 
       <TimePicker
         label="Start Time"

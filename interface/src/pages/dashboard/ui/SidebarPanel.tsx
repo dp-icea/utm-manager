@@ -16,6 +16,13 @@ import AddIcon from "@mui/icons-material/Add";
 import { useStrips } from "@/shared/lib/strips";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import CloseIcon from "@mui/icons-material/Close";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/shared/ui";
+import SortIcon from "@mui/icons-material/Sort";
 import {
   DndContext,
   closestCenter,
@@ -37,6 +44,9 @@ import FlightStripFilters from "./flight-strips/FlightStripFilters";
 import { areArraysEqual } from "@/shared/lib";
 import { FlightStripsService } from "@/shared/api";
 
+type SortMode = "normal" | "byId" | "activeFirst";
+type ActiveFilter = "all" | "active" | "inactive";
+
 export const SidebarPanel = () => {
   const [strips, setStrips] = useState<FlightStripUI[]>([]);
   const [loading, setLoading] = useState(false);
@@ -45,7 +55,10 @@ export const SidebarPanel = () => {
   const [endTime, setEndTime] = useState("");
   const [snackbar, setSnackbar] = useState({ open: false, message: "" });
   const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [filterDialogOpen, setFilterDialogOpen] = useState(false);
+
+  const [activeFilter, setActiveFilter] = useState<ActiveFilter>("all");
+  const [sortMode, setSortMode] = useState<SortMode>("normal");
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingStrip, setEditingStrip] = useState<FlightStripUI | null>(null);
@@ -167,21 +180,71 @@ export const SidebarPanel = () => {
     }
   };
 
-  const filteredStrips = strips.filter((strip) => {
-    if (
-      selectedColors.length > 0 &&
-      !selectedColors.includes(strip.flightArea)
-    ) {
-      return false;
+  // const filteredStrips = strips.filter((strip) => {
+  //   if (
+  //     selectedColors.length > 0 &&
+  //     !selectedColors.includes(strip.flightArea)
+  //   ) {
+  //     return false;
+  //   }
+  //   if (startTime && strip.takeoffTime && strip.takeoffTime < startTime) {
+  //     return false;
+  //   }
+  //   if (endTime && strip.landingTime && strip.landingTime > endTime) {
+  //     return false;
+  //   }
+  //   return true;
+  // });
+
+  const handleCycleSorting = () => {
+    setSortMode((prev) => {
+      if (prev === "normal") return "byId";
+      if (prev === "byId") return "activeFirst";
+      return "normal";
+    });
+  };
+
+  const getSortLabel = () => {
+    if (sortMode === "byId") return "Sorted by ID";
+    if (sortMode === "activeFirst") return "Active First";
+    return "Sort";
+  };
+
+  const filteredStrips = (() => {
+    let result = strips.filter((strip) => {
+      if (
+        selectedColors.length > 0 &&
+        !selectedColors.includes(strip.flightArea)
+      ) {
+        return false;
+      }
+      if (startTime && strip.takeoffTime && strip.takeoffTime < startTime) {
+        return false;
+      }
+      if (endTime && strip.landingTime && strip.landingTime > endTime) {
+        return false;
+      }
+      if (activeFilter === "active" && !strip.active) {
+        return false;
+      }
+      if (activeFilter === "inactive" && strip.active) {
+        return false;
+      }
+      return true;
+    });
+
+    // Apply sorting
+    if (sortMode === "byId") {
+      result = [...result].sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortMode === "activeFirst") {
+      result = [...result].sort((a, b) => {
+        if (a.active === b.active) return 0;
+        return a.active ? -1 : 1;
+      });
     }
-    if (startTime && strip.takeoffTime && strip.takeoffTime < startTime) {
-      return false;
-    }
-    if (endTime && strip.landingTime && strip.landingTime > endTime) {
-      return false;
-    }
-    return true;
-  });
+
+    return result;
+  })();
 
   const onRegionSelectOnViewer = () => {
     console.log("On Region Select On Viewer");
@@ -254,12 +317,49 @@ export const SidebarPanel = () => {
           </Button>
           <Button
             variant="outlined"
-            startIcon={<FilterListIcon />}
-            onClick={() => setFilterDialogOpen(true)}
+            startIcon={<SortIcon />}
+            onClick={handleCycleSorting}
+            sx={{ minWidth: "fit-content" }}
           >
-            Filter
+            {getSortLabel()}
           </Button>
         </Box>
+
+        <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
+          <Box sx={{ px: 2, py: 2, borderBottom: 1, borderColor: "divider" }}>
+            <CollapsibleTrigger asChild>
+              <Button
+                variant="text"
+                startIcon={<FilterListIcon />}
+                endIcon={
+                  filtersOpen ? (
+                    <ChevronUp size={16} />
+                  ) : (
+                    <ChevronDown size={16} />
+                  )
+                }
+                fullWidth
+                sx={{ justifyContent: "space-between" }}
+              >
+                Filters
+              </Button>
+            </CollapsibleTrigger>
+          </Box>
+          <CollapsibleContent>
+            <Box sx={{ p: 2, borderBottom: 1, borderColor: "divider" }}>
+              <FlightStripFilters
+                selectedColors={selectedColors}
+                onColorsChange={setSelectedColors}
+                startTime={startTime}
+                onStartTimeChange={setStartTime}
+                endTime={endTime}
+                onEndTimeChange={setEndTime}
+                activeFilter={activeFilter}
+                onActiveFilterChange={setActiveFilter}
+              />
+            </Box>
+          </CollapsibleContent>
+        </Collapsible>
 
         <Box sx={{ flex: 1, overflowY: "auto", p: 2 }}>
           <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
@@ -318,36 +418,6 @@ export const SidebarPanel = () => {
         </DialogTitle>
         <DialogContent>
           <AddFlightStripForm onAdd={handleAddStrip} />
-        </DialogContent>
-      </Dialog>
-
-      <Dialog
-        open={filterDialogOpen}
-        onClose={() => setFilterDialogOpen(false)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          Filter Flight Strips
-          <IconButton onClick={() => setFilterDialogOpen(false)} size="small">
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent>
-          <FlightStripFilters
-            selectedColors={selectedColors}
-            onColorsChange={setSelectedColors}
-            startTime={startTime}
-            onStartTimeChange={setStartTime}
-            endTime={endTime}
-            onEndTimeChange={setEndTime}
-          />
         </DialogContent>
       </Dialog>
 

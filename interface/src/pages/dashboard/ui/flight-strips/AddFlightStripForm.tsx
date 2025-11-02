@@ -62,7 +62,7 @@ const AddFlightStripForm = ({
       ...(takeoffTime && { takeoffTime: takeoffTime.format("HH:mm") }),
       ...(landingTime && { landingTime: landingTime.format("HH:mm") }),
       ...(description && { description }),
-      active: editStrip?.active ?? true,
+      active: editStrip?.active ?? false,
     };
 
     try {
