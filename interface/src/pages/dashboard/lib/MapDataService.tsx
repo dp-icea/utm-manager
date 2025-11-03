@@ -271,7 +271,8 @@ export const MapDataService = () => {
     if (!controller.current) return;
 
     setLoading(true);
-    const viewRectangle = controller.current.getViewRectangle();
+    // const viewRectangle = controller.current.getViewRectangle();
+    const viewRectangle = controller.current.getFixedViewInterlagosRectangle();
     if (viewRectangle) {
       await fetchFlights(viewRectangle);
     }

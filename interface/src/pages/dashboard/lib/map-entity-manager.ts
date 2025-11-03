@@ -644,6 +644,17 @@ export class MapEntityManager {
     return ret;
   };
 
+  getFixedViewInterlagosRectangle = (): Rectangle => {
+    const ret: Rectangle = {
+      north: -23.69766990320491,
+      east: -46.693198433969286,
+      south: -23.70465991914122,
+      west: -46.7009636313889,
+    };
+
+    return ret;
+  };
+
   private drawCylinder(
     volume: Volume3D,
     color: Cesium.Color = Cesium.Color.GREY,
