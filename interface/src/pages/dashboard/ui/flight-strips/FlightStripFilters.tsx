@@ -69,7 +69,7 @@ const FlightStripFilters = ({
           <TextField
             {...params}
             label={t("filters.flightArea")}
-            placeholder="{t('filters.flightAreaPlaceholder')}"
+            placeholder={t("filters.flightAreaPlaceholder")}
             size="small"
           />
         )}

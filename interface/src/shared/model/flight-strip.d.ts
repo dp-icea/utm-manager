@@ -24,6 +24,15 @@ export const FLIGHT_AREA_LABELS: Record<FlightArea, string> = {
   purple: "Purple",
 };
 
+export const FLIGHT_AREA_COLORS_HEX: Record<FlightArea, string> = {
+  red: "#FF5733",
+  yellow: "#FFC300",
+  orange: "#FF8D1A",
+  green: "#28B463",
+  blue: "#3498DB",
+  purple: "#9B59B6",
+};
+
 export function formatFlightArea(area: FlightArea): string {
   return FLIGHT_AREA_LABELS[area];
 }

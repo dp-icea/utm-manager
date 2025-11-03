@@ -43,7 +43,9 @@ export class MapViewer extends Component {
           <ImageryLayer
             imageryProvider={
               new Cesium.OpenStreetMapImageryProvider({
-                url: "https://a.tile.openstreetmap.org",
+                // url: "https://a.tile.openstreetmap.org",
+                // url: "https://cartodb-basemaps-a.global.ssl.fastly.net/light_all/",
+                url: "https://a.tile.openstreetmap.fr/hot/",
               })
             }
             show={true}

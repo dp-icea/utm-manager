@@ -10,6 +10,7 @@ import type {
   Volume3D,
   Volume4D,
   FlightArea,
+  FlightStripUI,
 } from "@/shared/model";
 import {
   areArraysEqual,
@@ -17,6 +18,7 @@ import {
   isIdentificationServiceArea,
   isOperationalIntent,
 } from "@/shared/lib";
+import type { DroneMapping } from "@/pages/drone-mapping";
 
 const DEFAULT_POLYGON_ALPHA = 0.3;
 const SELECTED_POLYGON_ALPHA = 0.5;
@@ -62,6 +64,8 @@ export class MapEntityManager {
   private geoJsonData: GeoJsonFormat | null = null;
   private geoJsonEntities: Cesium.Entity[] = [];
   private selectedGeoJsonEntities: Set<Cesium.Entity> = new Set();
+  private droneMappings: Array<DroneMapping> = [];
+  private strips: FlightStripUI[] = [];
 
   private onSelectedGeoJsonEntitiesChange: () => void = () => { };
 
@@ -84,6 +88,8 @@ export class MapEntityManager {
     });
 
     this.handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
+
+    this.droneMappings = this.loadDroneMappings();
 
     this.loadGeoJsonZones();
 
@@ -130,6 +136,20 @@ export class MapEntityManager {
     this.viewer.scene.mode = mode;
   }
 
+  private loadDroneMappings(): Array<DroneMapping> {
+    const saved = localStorage.getItem("droneMappings");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error("Failed to load drone mappings:", e);
+        return [];
+      }
+    } else {
+      return [];
+    }
+  }
+
   private selectGeoJsonEntity(entity: Cesium.Entity) {
     const selectedRegionId = entity.id;
     const color =
@@ -164,6 +184,28 @@ export class MapEntityManager {
     };
   }
 
+  private maybeGetDroneMappingName(id: string | null): string | null {
+    if (!id) {
+      return null;
+    }
+
+    console.log("Drone Mappings", this.droneMappings);
+
+    const mapping = this.droneMappings.find(
+      (mapping) => mapping.serialNumber === id || mapping.sisant === id,
+    );
+    return mapping?.id || null;
+  }
+
+  private maybeGetDroneStrip(id: string | null): FlightStripUI | null {
+    if (!id) {
+      return null;
+    }
+
+    const strip = this.strips.find((strip) => strip.name === id);
+    return strip || null;
+  }
+
   updateSelectedEntities(arr: Array<FlightArea>) {
     const currentSelectedIds = Array.from(this.selectedGeoJsonEntities).map(
       (entity) => entity.id,
@@ -186,6 +228,10 @@ export class MapEntityManager {
         this.selectGeoJsonEntity(entity);
       }
     });
+  }
+
+  updateStrips(strips: FlightStripUI[]) {
+    this.strips = strips;
   }
 
   addMoveEndCallback(callback: () => void) {
@@ -288,6 +334,18 @@ export class MapEntityManager {
         return;
       }
 
+      let ellipsoidColor = Cesium.Color.BLACK;
+      const droneId = newFlight.details?.uas_id.registration_id || newFlight.id;
+      const mappingName = this.maybeGetDroneMappingName(droneId) || droneId;
+      const strip = this.maybeGetDroneStrip(mappingName);
+      if (strip) {
+        if (strip.active) {
+          ellipsoidColor = Cesium.Color.GREEN;
+        } else {
+          ellipsoidColor = Cesium.Color.RED;
+        }
+      }
+
       if (this.flights[id]) {
         const entity = this.flights[id][0];
         entity.position = Cesium.Cartesian3.fromDegrees(
@@ -296,6 +354,10 @@ export class MapEntityManager {
           position.alt,
           Cesium.Ellipsoid.WGS84,
         );
+
+        if (entity.ellipsoid) {
+          entity.ellipsoid.material = ellipsoidColor;
+        }
 
         if (this.flights[id].length > 1) {
           if (this.viewer.scene.mode === Cesium.SceneMode.SCENE3D) {
@@ -319,20 +381,6 @@ export class MapEntityManager {
       } else {
         this.flights[id] = [];
 
-        // const entity = this.viewer.entities.add({
-        //   position: Cesium.Cartesian3.fromDegrees(
-        //     position.lng,
-        //     position.lat,
-        //     position.alt,
-        //     Cesium.Ellipsoid.WGS84,
-        //   ),
-        //   model: {
-        //     uri: "/Inspire.glb",
-        //     minimumPixelSize: 100,
-        //     maximumScale: 1,
-        //   },
-        // });
-
         const entity = this.viewer.entities.add({
           id: id,
           position: Cesium.Cartesian3.fromDegrees(
@@ -344,13 +392,16 @@ export class MapEntityManager {
           // Replace point with sphere
           ellipsoid: {
             radii: new Cesium.Cartesian3(10, 10, 10), // Adjust radius as needed
-            material: Cesium.Color.BLACK.withAlpha(0.8),
+            material: ellipsoidColor,
           },
         });
 
         this.flights[id].push(entity);
 
         if (newFlight.details?.uas_id || newFlight.id) {
+          const droneId =
+            newFlight.details?.uas_id.registration_id || newFlight.id;
+          const droneName = this.maybeGetDroneMappingName(droneId) || droneId;
           if (this.viewer.scene.mode === Cesium.SceneMode.SCENE3D) {
             const label = this.viewer.entities.add({
               position: Cesium.Cartesian3.fromDegrees(
@@ -360,7 +411,7 @@ export class MapEntityManager {
                 Cesium.Ellipsoid.WGS84,
               ),
               label: {
-                text: newFlight.details?.uas_id.registration_id || newFlight.id,
+                text: droneName,
                 font: "14px sans-serif",
                 fillColor: Cesium.Color.BLACK,
                 outlineColor: Cesium.Color.BLACK,
@@ -380,7 +431,7 @@ export class MapEntityManager {
                 Cesium.Ellipsoid.WGS84,
               ),
               label: {
-                text: newFlight.details?.uas_id.registration_id || newFlight.id,
+                text: droneName,
                 font: "14px sans-serif",
                 fillColor: Cesium.Color.BLACK,
                 outlineColor: Cesium.Color.BLACK,

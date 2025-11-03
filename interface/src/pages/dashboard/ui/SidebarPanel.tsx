@@ -49,7 +49,6 @@ type SortMode = "normal" | "byId" | "activeFirst";
 type ActiveFilter = "all" | "active" | "inactive";
 
 export const SidebarPanel = () => {
-  const [strips, setStrips] = useState<FlightStripUI[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedColors, setSelectedColors] = useState<FlightArea[]>([]);
   const [startTime, setStartTime] = useState("");
@@ -73,7 +72,7 @@ export const SidebarPanel = () => {
     null,
   );
 
-  const { activeStripIds, setActiveStripIds } = useStrips();
+  const { activeStripIds, setActiveStripIds, strips, setStrips } = useStrips();
 
   const { t } = useLanguage();
 

@@ -81,7 +81,7 @@ export const MapDataService = () => {
     sceneMode,
   } = useMap();
 
-  const { activeStripIds, setActiveStripIds } = useStrips();
+  const { activeStripIds, setActiveStripIds, strips } = useStrips();
 
   const getTimeRange: () => TimeRange = () => {
     const startDateTime = new Date(
@@ -398,6 +398,12 @@ export const MapDataService = () => {
     controller.current.updateSelectedEntities(activeStripIds);
   };
 
+  const onStripsChange: React.EffectCallback = () => {
+    if (!controller.current) return;
+
+    controller.current.updateStrips(strips);
+  };
+
   // Object state on the dynamic input
   useEffect(onActiveStripsChange, [activeStripIds]);
   useEffect(onViewerStart, [viewer]);
@@ -425,6 +431,8 @@ export const MapDataService = () => {
       controller.current = null;
     };
   }, []);
+
+  useEffect(onStripsChange, [strips]);
 
   useEffect(() => {
     if (!controller.current) return;

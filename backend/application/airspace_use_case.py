@@ -88,8 +88,8 @@ class AirspaceQueryUseCase:
 
         return AirspaceFlights(
             timestamp=datetime.now(),
-            # flights=flights,
-            flights=generate_flight_mock_data(),
+            flights=flights + generate_flight_mock_data(),
+            # flights=generate_flight_mock_data(),
         )
 
     async def _get_constraint_details(self, references) -> List[Constraint]:
