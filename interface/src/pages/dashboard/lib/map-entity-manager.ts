@@ -334,7 +334,7 @@ export class MapEntityManager {
         return;
       }
 
-      let ellipsoidColor = Cesium.Color.BLACK;
+      let ellipsoidColor = Cesium.Color.RED;
       const droneId = newFlight.details?.uas_id.registration_id || newFlight.id;
       const mappingName = this.maybeGetDroneMappingName(droneId) || droneId;
       const strip = this.maybeGetDroneStrip(mappingName);
@@ -342,7 +342,7 @@ export class MapEntityManager {
         if (strip.active) {
           ellipsoidColor = Cesium.Color.GREEN;
         } else {
-          ellipsoidColor = Cesium.Color.RED;
+          ellipsoidColor = Cesium.Color.BLACK;
         }
       }
 
