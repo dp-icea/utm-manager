@@ -3,9 +3,20 @@ import { useNavigate } from "react-router-dom";
 import IconBRUTM from "@/shared/assets/logo.svg";
 import { ROUTES } from "@/shared/config";
 import { useAuth } from "@/shared/lib/hook";
-import { Box, Button, Typography, AppBar, Toolbar } from "@mui/material";
+import {
+  Box,
+  Button,
+  Typography,
+  AppBar,
+  Toolbar,
+  Select,
+  MenuItem,
+  FormControl,
+} from "@mui/material";
 import { useMap } from "@/shared/lib/map";
 import * as Cesium from "cesium";
+import { useLanguage } from "@/shared/lib/lang";
+import { Languages } from "lucide-react";
 
 import LogoutIcon from "@mui/icons-material/Logout";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -14,6 +25,7 @@ export const Header = () => {
   const { logout } = useAuth();
   const { sceneMode, setSceneMode } = useMap();
   const navigate = useNavigate();
+  const { language, setLanguage, t } = useLanguage();
 
   const handleLogout = () => {
     logout();
@@ -38,20 +50,43 @@ export const Header = () => {
             className="h-10 w-10 rounded-full"
           />
           <div className="flex flex-col items-start">
-            <p className="text-xl font-bold text-white">BR-UTM Manager</p>
-            <p className="text-sm text-gray-300">UTM Traffic Control System</p>
+            <p className="text-xl font-bold text-white">{t("header.title")}</p>
+            <p className="text-sm text-gray-300">{t("header.subtitle")}</p>
           </div>
         </div>
       </div>
 
       <Box sx={{ display: "flex", gap: 2 }}>
+        <FormControl size="small" sx={{ minWidth: 120 }}>
+          <Select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value as "en" | "pt")}
+            sx={{
+              color: "inherit",
+              ".MuiOutlinedInput-notchedOutline": {
+                borderColor: "rgba(255, 255, 255, 0.23)",
+              },
+              "&:hover .MuiOutlinedInput-notchedOutline": {
+                borderColor: "rgba(255, 255, 255, 0.5)",
+              },
+              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                borderColor: "white",
+              },
+              ".MuiSvgIcon-root": { color: "white" },
+            }}
+            startAdornment={<Languages size={16} style={{ marginRight: 8 }} />}
+          >
+            <MenuItem value="en">English</MenuItem>
+            <MenuItem value="pt">Português</MenuItem>
+          </Select>
+        </FormControl>
         <Button
           variant="outlined"
           startIcon={<SettingsIcon />}
           onClick={() => navigate("/drone-mapping")}
           color="inherit"
         >
-          Drone Mapping
+          {t("header.droneMapping")}
         </Button>
         <Button
           variant="outlined"
@@ -69,7 +104,7 @@ export const Header = () => {
           onClick={handleLogout}
           color="inherit"
         >
-          Logout
+          {t("header.logout")}
         </Button>
       </Box>
     </header>

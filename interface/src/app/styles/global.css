@@ -155,4 +155,18 @@
     scrollbar-width: thin;
     scrollbar-color: rgba(156, 163, 175, 0.8) rgba(55, 65, 81, 0.3);
   }
+
+  /* Resizable handle styles */
+  .resize-handle-hover {
+    transition: all 0.2s ease;
+  }
+
+  .resize-handle-hover:hover {
+    background: hsl(var(--border) / 0.3) !important;
+    box-shadow: 0 0 8px hsl(var(--primary) / 0.5);
+  }
+
+  .resize-handle-hover::after {
+    background: hsl(var(--primary) / 0.6) !important;
+  }
 }

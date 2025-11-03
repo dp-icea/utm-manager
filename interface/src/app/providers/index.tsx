@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { LanguageProvider } from "@/shared/lib/lang";
 import { BrowserRouter } from "react-router-dom";
 import { Toaster } from "@/shared/ui/toaster";
 
@@ -9,8 +10,10 @@ interface ProvidersProps {
 }
 
 export const Providers = ({ children }: ProvidersProps) => (
-  <QueryClientProvider client={queryClient}>
-    <Toaster />
-    <BrowserRouter>{children}</BrowserRouter>
-  </QueryClientProvider>
+  <LanguageProvider>
+    <QueryClientProvider client={queryClient}>
+      <Toaster />
+      <BrowserRouter>{children}</BrowserRouter>
+    </QueryClientProvider>
+  </ LanguageProvider>
 );

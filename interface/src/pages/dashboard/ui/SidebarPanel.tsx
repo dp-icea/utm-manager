@@ -43,6 +43,7 @@ import AddFlightStripForm from "./flight-strips/AddFlightStripForm";
 import FlightStripFilters from "./flight-strips/FlightStripFilters";
 import { areArraysEqual } from "@/shared/lib";
 import { FlightStripsService } from "@/shared/api";
+import { useLanguage } from "@/shared/lib/lang";
 
 type SortMode = "normal" | "byId" | "activeFirst";
 type ActiveFilter = "all" | "active" | "inactive";
@@ -74,6 +75,8 @@ export const SidebarPanel = () => {
 
   const { activeStripIds, setActiveStripIds } = useStrips();
 
+  const { t } = useLanguage();
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -87,12 +90,11 @@ export const SidebarPanel = () => {
       setStrips([...strips, strip]);
       setSnackbar({
         open: true,
-        message: `Flight strip added: ${strip.name} - ${strip.flightArea} area`,
+        message: `${t("snackbar.addStrip")}: ${strip.name} - ${strip.flightArea}`,
       });
       setAddDialogOpen(false);
     } catch (error) {
-      console.error("Failed to add flight strip:", error);
-      setSnackbar({ open: true, message: "Failed to add flight strip" });
+      setSnackbar({ open: true, message: `${t("snackbar.failAddStrip")}` });
     }
   };
 

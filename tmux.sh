@@ -38,7 +38,7 @@ tmux send-keys -t $SESSION:interface.1 "cd interface" C-m
 tmux send-keys -t $SESSION:interface.1 "npm run dev" C-m
 
 # Create third window (tab): lazygit
-tmux new-window -t $SESSION -n lazgit
+tmux new-window -t $SESSION -n lazygit
 
 # Main pane: lazygit
 tmux send-keys -t $SESSION:lazygit "lazygit" C-m

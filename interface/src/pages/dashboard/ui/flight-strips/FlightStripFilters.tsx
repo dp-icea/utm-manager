@@ -8,6 +8,7 @@ import {
 } from "@mui/material";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { FLIGHT_AREA_LABELS, FLIGHT_AREAS } from "@/shared/model";
+import { useLanguage } from "@/shared/lib/lang";
 
 import type { FlightArea } from "@/shared/model";
 import dayjs, { Dayjs } from "dayjs";
@@ -40,6 +41,8 @@ const FlightStripFilters = ({
   activeFilter,
   onActiveFilterChange,
 }: FlightStripFiltersProps) => {
+  const { t } = useLanguage();
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}>
       <Autocomplete
@@ -65,8 +68,8 @@ const FlightStripFilters = ({
         renderInput={(params) => (
           <TextField
             {...params}
-            label="Flight Areas"
-            placeholder="Select flight areas"
+            label={t("filters.flightArea")}
+            placeholder="{t('filters.flightAreaPlaceholder')}"
             size="small"
           />
         )}
@@ -74,17 +77,17 @@ const FlightStripFilters = ({
 
       <Select
         value={activeFilter}
-        label="Status"
+        label={t("filters.status")}
         size="small"
         onChange={(e) => onActiveFilterChange(e.target.value as ActiveFilter)}
       >
-        <MenuItem value="all">All</MenuItem>
-        <MenuItem value="active">Active Only</MenuItem>
-        <MenuItem value="inactive">Inactive Only</MenuItem>
+        <MenuItem value="all">{t("filters.all")}</MenuItem>
+        <MenuItem value="active">{t("filters.activeOnly")}</MenuItem>
+        <MenuItem value="inactive">{t("filters.inactiveOnly")}</MenuItem>
       </Select>
 
       <TimePicker
-        label="Start Time"
+        label={t("filters.startTime")}
         value={parseTimeString(startTime)}
         onChange={(newValue) =>
           onStartTimeChange(newValue ? newValue.format("HH:mm") : "")
@@ -99,7 +102,7 @@ const FlightStripFilters = ({
       />
 
       <TimePicker
-        label="End Time"
+        label={t("filters.endTime")}
         value={parseTimeString(endTime)}
         onChange={(newValue) =>
           onEndTimeChange(newValue ? newValue.format("HH:mm") : "")
