@@ -63,6 +63,8 @@ export const MapProvider = ({ children }: { children: ReactNode }) => {
     [],
   );
 
+  const [viewer, setViewer] = useState<Cesium.Viewer | null>(null);
+
   return (
     <MapContext.Provider
       value={{
@@ -98,6 +100,8 @@ export const MapProvider = ({ children }: { children: ReactNode }) => {
         setFlightProvidersFilter,
         sceneMode,
         setSceneMode,
+        viewer,
+        setViewer,
       }}
     >
       {children}

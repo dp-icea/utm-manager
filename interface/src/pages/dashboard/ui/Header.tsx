@@ -1,8 +1,11 @@
+import { Cartesian3 } from "cesium";
+import { useEffect } from "react";
 import { Map, Globe } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import IconBRUTM from "@/shared/assets/logo.svg";
 import { ROUTES } from "@/shared/config";
 import { useAuth } from "@/shared/lib/hook";
+import { useCesium } from "resium";
 import {
   Box,
   Button,
@@ -19,11 +22,12 @@ import { useLanguage } from "@/shared/lib/lang";
 import { Languages } from "lucide-react";
 
 import LogoutIcon from "@mui/icons-material/Logout";
+import AdjustIcon from "@mui/icons-material/Adjust";
 import SettingsIcon from "@mui/icons-material/Settings";
 
 export const Header = () => {
   const { logout } = useAuth();
-  const { sceneMode, setSceneMode } = useMap();
+  const { sceneMode, setSceneMode, viewer } = useMap();
   const navigate = useNavigate();
   const { language, setLanguage, t } = useLanguage();
 
@@ -38,6 +42,29 @@ export const Header = () => {
         ? Cesium.SceneMode.SCENE2D
         : Cesium.SceneMode.SCENE3D,
     );
+  };
+
+  const onCenterCamera = () => {
+    if (!viewer) {
+      console.log("Viewer not available from the header");
+      return;
+    }
+
+    const [latitude, longitude] = [-23.701465417218216, -46.696952192815985];
+    const cameraAltitude = 5000;
+
+    viewer.camera.setView({
+      destination: Cesium.Cartesian3.fromDegrees(
+        longitude,
+        latitude,
+        cameraAltitude,
+      ),
+      orientation: {
+        heading: Cesium.Math.toRadians(0),
+        pitch: Cesium.Math.toRadians(-70),
+        roll: 0,
+      },
+    });
   };
 
   return (
@@ -97,6 +124,14 @@ export const Header = () => {
           color="inherit"
         >
           {sceneMode === Cesium.SceneMode.SCENE3D ? "3D Mode" : "2D Mode"}
+        </Button>
+        <Button
+          variant="outlined"
+          startIcon={<AdjustIcon />}
+          onClick={onCenterCamera}
+          color="inherit"
+        >
+          Center Camera
         </Button>
         <Button
           variant="text"

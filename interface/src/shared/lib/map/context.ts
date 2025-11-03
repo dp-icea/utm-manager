@@ -48,6 +48,8 @@ export interface IMapContext {
   setFlightProvidersFilter: (flights: string[]) => void;
   sceneMode: Cesium.SceneMode;
   setSceneMode: (mode: Cesium.SceneMode) => void;
+  viewer: Cesium.Viewer | null;
+  setViewer: (viewer: Cesium.Viewer | null) => void;
 }
 
 export const MapContext = createContext<IMapContext | undefined>(undefined);

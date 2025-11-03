@@ -79,6 +79,7 @@ export const MapDataService = () => {
     flightsFilter,
     flightProvidersFilter,
     sceneMode,
+    setViewer,
   } = useMap();
 
   const { activeStripIds, setActiveStripIds, strips } = useStrips();
@@ -288,6 +289,7 @@ export const MapDataService = () => {
     if (!viewer || controller.current) return;
 
     controller.current = new MapEntityManager(viewer);
+    setViewer(viewer);
 
     timeRange.current = getTimeRange();
 
