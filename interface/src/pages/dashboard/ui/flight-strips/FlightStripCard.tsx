@@ -23,6 +23,7 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useLanguage } from "@/shared/lib/lang";
 
 interface FlightStripCardProps {
   strip: FlightStripUI;
@@ -37,6 +38,7 @@ const FlightStripCard = ({
   onEdit,
   onToggle,
 }: FlightStripCardProps) => {
+  const { t } = useLanguage();
   const {
     attributes,
     listeners,
@@ -166,7 +168,7 @@ const FlightStripCard = ({
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
               <ArrowUpwardIcon sx={{ fontSize: 14, color: "primary.main" }} />
               <Typography variant="caption" color="text.secondary">
-                Takeoff:
+                {t("flightStrip.takeoff")}:
               </Typography>
               <Typography variant="caption" fontFamily="monospace">
                 {strip.takeoffSpace}
@@ -178,7 +180,7 @@ const FlightStripCard = ({
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
               <ArrowDownwardIcon sx={{ fontSize: 14, color: "primary.main" }} />
               <Typography variant="caption" color="text.secondary">
-                Landing:
+                {t("flightStrip.landing")}:
               </Typography>
               <Typography variant="caption" fontFamily="monospace">
                 {strip.landingSpace}
@@ -190,7 +192,7 @@ const FlightStripCard = ({
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
               <AccessTimeIcon sx={{ fontSize: 14, color: "primary.main" }} />
               <Typography variant="caption" color="text.secondary">
-                Depart:
+                {t("flightStrip.depart")}:
               </Typography>
               <Typography variant="caption" fontFamily="monospace">
                 {strip.takeoffTime}
@@ -202,7 +204,7 @@ const FlightStripCard = ({
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
               <AccessTimeIcon sx={{ fontSize: 14, color: "primary.main" }} />
               <Typography variant="caption" color="text.secondary">
-                Arrive:
+                {t("flightStrip.arrive")}:
               </Typography>
               <Typography variant="caption" fontFamily="monospace">
                 {strip.landingTime}
@@ -220,7 +222,7 @@ const FlightStripCard = ({
               }}
             >
               <Typography variant="caption" color="text.secondary">
-                Height:
+                {t("flightStrip.height")}:
               </Typography>
               <Typography
                 variant="caption"

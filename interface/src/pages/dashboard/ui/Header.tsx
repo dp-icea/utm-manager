@@ -84,6 +84,34 @@ export const Header = () => {
       </div>
 
       <Box sx={{ display: "flex", gap: 2 }}>
+        <Button
+          variant="outlined"
+          startIcon={<AdjustIcon />}
+          onClick={onCenterCamera}
+          color="inherit"
+        >
+          {t("common.centerCamera")}
+        </Button>
+        <Button
+          variant="outlined"
+          startIcon={<SettingsIcon />}
+          onClick={() => navigate("/drone-mapping")}
+          color="inherit"
+        >
+          {t("header.droneMapping")}
+        </Button>
+        <Button
+          variant="outlined"
+          startIcon={
+            sceneMode === Cesium.SceneMode.SCENE3D ? <Globe /> : <Map />
+          }
+          onClick={toggleSceneMode}
+          color="inherit"
+        >
+          {sceneMode === Cesium.SceneMode.SCENE3D
+            ? t("common.3dMode")
+            : t("common.2dMode")}
+        </Button>
         <FormControl size="small" sx={{ minWidth: 120 }}>
           <Select
             value={language}
@@ -103,36 +131,10 @@ export const Header = () => {
             }}
             startAdornment={<Languages size={16} style={{ marginRight: 8 }} />}
           >
-            <MenuItem value="en">English</MenuItem>
-            <MenuItem value="pt">Português</MenuItem>
+            <MenuItem value="en">{t("common.english")}</MenuItem>
+            <MenuItem value="pt">{t("common.portuguese")}</MenuItem>
           </Select>
         </FormControl>
-        <Button
-          variant="outlined"
-          startIcon={<SettingsIcon />}
-          onClick={() => navigate("/drone-mapping")}
-          color="inherit"
-        >
-          {t("header.droneMapping")}
-        </Button>
-        <Button
-          variant="outlined"
-          startIcon={
-            sceneMode === Cesium.SceneMode.SCENE3D ? <Globe /> : <Map />
-          }
-          onClick={toggleSceneMode}
-          color="inherit"
-        >
-          {sceneMode === Cesium.SceneMode.SCENE3D ? "3D Mode" : "2D Mode"}
-        </Button>
-        <Button
-          variant="outlined"
-          startIcon={<AdjustIcon />}
-          onClick={onCenterCamera}
-          color="inherit"
-        >
-          Center Camera
-        </Button>
         <Button
           variant="text"
           startIcon={<LogoutIcon />}

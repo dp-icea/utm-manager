@@ -22,6 +22,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import { toast } from "sonner";
 import { ROUTES } from "@/shared/config";
+import { useLanguage } from "@/shared/lib/lang";
 
 export interface DroneMapping {
   id: string;
@@ -31,6 +32,7 @@ export interface DroneMapping {
 
 export const DroneMappingPage = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [mappings, setMappings] = useState<DroneMapping[]>([]);
 
   useEffect(() => {
@@ -95,12 +97,12 @@ export const DroneMappingPage = () => {
 
         if (newMappings.length > 0) {
           setMappings(newMappings);
-          toast.success(`Loaded ${newMappings.length} drone mappings from CSV`);
+          toast.success(t("droneMapping.loadedFromCSV", { count: newMappings.length }));
         } else {
-          toast.error("No valid data found in CSV file");
+          toast.error(t("droneMapping.noValidData"));
         }
       } catch (error) {
-        toast.error("Failed to parse CSV file");
+        toast.error(t("droneMapping.csvParseError"));
         console.error("CSV parse error:", error);
       }
     };
@@ -117,13 +119,13 @@ export const DroneMappingPage = () => {
     );
 
     if (validMappings.length === 0) {
-      toast.error("Please add at least one drone mapping");
+      toast.error(t("droneMapping.addAtLeastOne"));
       return;
     }
 
     // Save to localStorage
     localStorage.setItem("droneMappings", JSON.stringify(mappings));
-    toast.success("Drone mappings saved successfully");
+    toast.success(t("droneMapping.saved"));
     navigate(ROUTES.DASHBOARD);
   };
 
@@ -160,7 +162,7 @@ export const DroneMappingPage = () => {
             fontWeight="bold"
             sx={{ flex: 1 }}
           >
-            Drone Mapping Configuration
+            {t("droneMapping.configuration")}
           </Typography>
         </Toolbar>
       </AppBar>
@@ -175,14 +177,14 @@ export const DroneMappingPage = () => {
               mb: 3,
             }}
           >
-            <Typography variant="h6">Drone Mappings</Typography>
+            <Typography variant="h6">{t("droneMapping.mappings")}</Typography>
             <Box sx={{ display: "flex", gap: 2 }}>
               <Button
                 variant="outlined"
                 startIcon={<UploadFileIcon />}
                 component="label"
               >
-                Upload CSV
+                {t("droneMapping.uploadCSV")}
                 <input
                   type="file"
                   accept=".csv"
@@ -195,23 +197,23 @@ export const DroneMappingPage = () => {
                 startIcon={<AddIcon />}
                 onClick={handleAddRow}
               >
-                Add Row
+                {t("droneMapping.addRow")}
               </Button>
             </Box>
           </Box>
 
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            CSV format: Id, Serial Number, SISANT (with or without header row)
+            {t("droneMapping.csvFormat")}
           </Typography>
 
           <TableContainer>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>ID / Name</TableCell>
-                  <TableCell>Serial Number (SN)</TableCell>
-                  <TableCell>SISANT Number</TableCell>
-                  <TableCell width={80}>Actions</TableCell>
+                  <TableCell>{t("droneMapping.idName")}</TableCell>
+                  <TableCell>{t("droneMapping.serialNumberSN")}</TableCell>
+                  <TableCell>{t("droneMapping.sisantNumber")}</TableCell>
+                  <TableCell width={80}>{t("droneMapping.actions")}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -225,7 +227,7 @@ export const DroneMappingPage = () => {
                         onChange={(e) =>
                           handleFieldChange(index, "id", e.target.value)
                         }
-                        placeholder="Enter ID or Name"
+                        placeholder={t("droneMapping.enterIdName")}
                       />
                     </TableCell>
                     <TableCell>
@@ -240,7 +242,7 @@ export const DroneMappingPage = () => {
                             e.target.value,
                           )
                         }
-                        placeholder="Enter Serial Number"
+                        placeholder={t("droneMapping.enterSerialNumber")}
                       />
                     </TableCell>
                     <TableCell>
@@ -251,7 +253,7 @@ export const DroneMappingPage = () => {
                         onChange={(e) =>
                           handleFieldChange(index, "sisant", e.target.value)
                         }
-                        placeholder="Enter SISANT"
+                        placeholder={t("droneMapping.enterSisant")}
                       />
                     </TableCell>
                     <TableCell>
@@ -272,10 +274,10 @@ export const DroneMappingPage = () => {
 
         <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
           <Button variant="outlined" size="large" onClick={handleCancel}>
-            Cancel
+            {t("droneMapping.cancel")}
           </Button>
           <Button variant="contained" size="large" onClick={handleSend}>
-            Save
+            {t("droneMapping.save")}
           </Button>
         </Box>
       </Box>

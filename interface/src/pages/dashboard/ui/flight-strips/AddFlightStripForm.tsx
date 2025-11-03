@@ -15,6 +15,7 @@ import { FLIGHT_AREAS } from "@/shared/model";
 import { useStrips } from "@/shared/lib/strips";
 import { formatFlightArea } from "@/shared/model";
 import { FlightStripsService } from "@/shared/api";
+import { useLanguage } from "@/shared/lib/lang";
 
 interface AddFlightStripFormProps {
   onAdd: (strip: FlightStripUI) => Promise<void>;
@@ -28,6 +29,7 @@ const AddFlightStripForm = ({
   onEdit,
 }: AddFlightStripFormProps) => {
   const { activeStripIds } = useStrips();
+  const { t } = useLanguage();
 
   const [id, setId] = useState(editStrip?.name || "");
   const [flightArea, setFlightArea] = useState<FlightArea>(
@@ -97,7 +99,7 @@ const AddFlightStripForm = ({
       sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}
     >
       <TextField
-        label="ID"
+        label={t("common.id")}
         size="small"
         fullWidth
         value={id}
@@ -107,10 +109,10 @@ const AddFlightStripForm = ({
       />
 
       <FormControl size="small" fullWidth required>
-        <InputLabel>Flight Area</InputLabel>
+        <InputLabel>{t("common.flightArea")}</InputLabel>
         <Select
           value={flightArea}
-          label="Flight Area"
+          label={t("common.flightArea")}
           onChange={(e) => setFlightArea(e.target.value as FlightArea)}
         >
           {FLIGHT_AREAS.map((area) => (
@@ -122,7 +124,7 @@ const AddFlightStripForm = ({
       </FormControl>
 
       <TextField
-        label="Height (m)"
+        label={t("addStrip.height")}
         size="small"
         type="number"
         fullWidth
@@ -131,7 +133,7 @@ const AddFlightStripForm = ({
       />
 
       <TextField
-        label="Takeoff Space"
+        label={t("addStrip.takeoffSpace")}
         size="small"
         fullWidth
         value={takeoffSpace}
@@ -139,7 +141,7 @@ const AddFlightStripForm = ({
       />
 
       <TextField
-        label="Landing Space"
+        label={t("addStrip.landingSpace")}
         size="small"
         fullWidth
         value={landingSpace}
@@ -147,18 +149,18 @@ const AddFlightStripForm = ({
       />
 
       <TextField
-        label="Description"
+        label={t("addStrip.description")}
         size="small"
         fullWidth
         multiline
         rows={2}
         value={description}
         onChange={(e) => setDescription(e.target.value)}
-        placeholder="Add a comment or note..."
+        placeholder={t("addStrip.descriptionPlaceholder")}
       />
 
       <TimePicker
-        label="Takeoff Time"
+        label={t("addStrip.takeoffTime")}
         value={takeoffTime}
         onChange={(newValue) => setTakeoffTime(newValue)}
         ampm={false}
@@ -171,7 +173,7 @@ const AddFlightStripForm = ({
       />
 
       <TimePicker
-        label="Landing Time"
+        label={t("addStrip.landingTime")}
         value={landingTime}
         onChange={(newValue) => setLandingTime(newValue)}
         ampm={false}
@@ -184,7 +186,7 @@ const AddFlightStripForm = ({
       />
 
       <Button type="submit" variant="contained" fullWidth>
-        {editStrip ? "Save Changes" : "Add Flight Strip"}
+        {editStrip ? t("addStrip.saveChanges") : t("addStrip.addFlightStrip")}
       </Button>
     </Box>
   );

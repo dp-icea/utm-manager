@@ -13,6 +13,7 @@ import {
 } from "@/shared/ui";
 import LogoBRUTM from "@/shared/assets/logo.svg";
 import { useToast, useAuth } from "@/shared/lib/hook";
+import { useLanguage } from "@/shared/lib/lang";
 
 export const LoginPage = () => {
   const [username, setUsername] = useState("");
@@ -20,6 +21,7 @@ export const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { login } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || ROUTES.DASHBOARD;
@@ -54,8 +56,8 @@ export const LoginPage = () => {
         const token = generateJWT();
         sessionStorage.setItem("accessToken", token);
         toast({
-          title: "Login Successful",
-          description: "Welcome to the BR-UTM monitoring system",
+          title: t("login.success"),
+          description: t("login.welcomeMessage"),
         });
 
         login();
@@ -63,8 +65,8 @@ export const LoginPage = () => {
         navigate(from, { replace: true });
       } else {
         toast({
-          title: "Login Failed",
-          description: "Invalid username or password",
+          title: t("login.failed"),
+          description: t("login.invalidCredentials"),
           variant: "destructive",
         });
       }
@@ -82,17 +84,17 @@ export const LoginPage = () => {
             className="h-30 w-30 rounded-full"
           />
           <CardTitle className="text-2xl text-center text-white">
-            BR-UTM Manager
+            {t("login.title")}
           </CardTitle>
           <p className="text-sm text-center text-gray-400">
-            Sign in to access the drone management system
+            {t("login.subtitle")}
           </p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             <TextField
               fullWidth
-              label="Username"
+              label={t("login.username")}
               variant="outlined"
               margin="normal"
               value={username}
@@ -102,7 +104,7 @@ export const LoginPage = () => {
             />
             <TextField
               fullWidth
-              label="Password"
+              label={t("login.password")}
               type="password"
               variant="outlined"
               margin="normal"
@@ -115,7 +117,7 @@ export const LoginPage = () => {
               className="w-full bg-blue-600 hover:bg-blue-700 text-white"
               disabled={isLoading}
             >
-              {isLoading ? "Signing in..." : "Sign In"}
+              {isLoading ? t("login.signingIn") : t("login.signIn")}
             </Button>
           </form>
         </CardContent>

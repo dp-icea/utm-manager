@@ -89,11 +89,11 @@ export const SidebarPanel = () => {
       setStrips([...strips, strip]);
       setSnackbar({
         open: true,
-        message: `${t("snackbar.addStrip")}: ${strip.name} - ${strip.flightArea}`,
+        message: t("snackbar.stripAdded"),
       });
       setAddDialogOpen(false);
     } catch (error) {
-      setSnackbar({ open: true, message: `${t("snackbar.failAddStrip")}` });
+      setSnackbar({ open: true, message: t("sidebar.failAddStrip") });
     }
   };
 
@@ -118,15 +118,17 @@ export const SidebarPanel = () => {
         );
         setSnackbar({
           open: true,
-          message: `Strip ${updatedStrip.name} marked as ${updatedStrip.active ? "active" : "inactive"
-            }`,
+          message: t("sidebar.stripMarkedAs", {
+            name: updatedStrip.name,
+            status: updatedStrip.active ? t("common.active") : t("common.inactive")
+          }),
         });
         setActiveDialogOpen(false);
         setStripToToggle(null);
       }
     } catch (error) {
       console.error("Failed to update flight strip status:", error);
-      setSnackbar({ open: true, message: "Failed to update flight strip" });
+      setSnackbar({ open: true, message: t("sidebar.failUpdateStrip") });
     }
   };
 
@@ -135,13 +137,13 @@ export const SidebarPanel = () => {
       if (name) {
         await FlightStripsService.delete(name);
         setStrips(strips.filter((s) => s.name !== name));
-        setSnackbar({ open: true, message: `Strip ${name} has been removed` });
+        setSnackbar({ open: true, message: t("sidebar.stripRemoved", { name }) });
         setDeleteDialogOpen(false);
         setStripToDelete(null);
       }
     } catch (error) {
       console.error("Failed to remove flight strip:", error);
-      setSnackbar({ open: true, message: `Failed to remove strip ${name}` });
+      setSnackbar({ open: true, message: t("sidebar.failRemoveStrip", { name }) });
     }
   };
 
@@ -158,13 +160,13 @@ export const SidebarPanel = () => {
       );
       setSnackbar({
         open: true,
-        message: `Strip ${updatedStrip.name} updated successfully`,
+        message: t("sidebar.stripUpdated", { name: updatedStrip.name }),
       });
       setEditDialogOpen(false);
       setEditingStrip(null);
     } catch (error) {
       console.error("Failed to update flight strip:", error);
-      setSnackbar({ open: true, message: "Failed to update flight strip" });
+      setSnackbar({ open: true, message: t("sidebar.failUpdateStrip") });
     }
   };
 
@@ -206,9 +208,9 @@ export const SidebarPanel = () => {
   };
 
   const getSortLabel = () => {
-    if (sortMode === "byId") return "Sorted by ID";
-    if (sortMode === "activeFirst") return "Active First";
-    return "Sort";
+    if (sortMode === "byId") return t("sidebar.sortedById");
+    if (sortMode === "activeFirst") return t("sidebar.activeFirst");
+    return t("sidebar.sortButton");
   };
 
   const filteredStrips = (() => {
@@ -274,7 +276,7 @@ export const SidebarPanel = () => {
         setStrips(strips);
       } catch (error) {
         console.error("Failed to fetch flight strips:", error);
-        setSnackbar({ open: true, message: "Failed to load flight strips" });
+        setSnackbar({ open: true, message: t("sidebar.failLoadStrips") });
       } finally {
         setLoading(false);
       }
@@ -314,7 +316,7 @@ export const SidebarPanel = () => {
             onClick={() => setAddDialogOpen(true)}
             fullWidth
           >
-            Add Strip
+            {t("sidebar.addStripButton")}
           </Button>
           <Button
             variant="outlined"
@@ -342,7 +344,7 @@ export const SidebarPanel = () => {
                 fullWidth
                 sx={{ justifyContent: "space-between" }}
               >
-                Filters
+                {t("sidebar.filtersButton")}
               </Button>
             </CollapsibleTrigger>
           </Box>
@@ -364,11 +366,11 @@ export const SidebarPanel = () => {
 
         <Box sx={{ flex: 1, overflowY: "auto", p: 2 }}>
           <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-            Flight Strips ({filteredStrips.length})
+            {t("sidebar.flightStripsCount", { count: filteredStrips.length })}
           </Typography>
           {filteredStrips.length === 0 ? (
             <Typography variant="body2" color="text.secondary">
-              No flight strips to display
+              {t("sidebar.noFlightStrips")}
             </Typography>
           ) : (
             <DndContext
@@ -412,7 +414,7 @@ export const SidebarPanel = () => {
             alignItems: "center",
           }}
         >
-          Add Flight Strip
+          {t("sidebar.addFlightStripDialog")}
           <IconButton onClick={() => setAddDialogOpen(false)} size="small">
             <CloseIcon />
           </IconButton>
@@ -435,7 +437,7 @@ export const SidebarPanel = () => {
             alignItems: "center",
           }}
         >
-          Edit Flight Strip
+          {t("sidebar.editFlightStripDialog")}
           <IconButton onClick={() => setEditDialogOpen(false)} size="small">
             <CloseIcon />
           </IconButton>
@@ -457,23 +459,22 @@ export const SidebarPanel = () => {
         maxWidth="xs"
         fullWidth
       >
-        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogTitle>{t("common.confirmDeletion")}</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to delete flight strip {stripToDelete}? This
-            action cannot be undone.
+            {t("common.deleteConfirmMessage", { id: stripToDelete })}
           </Typography>
         </DialogContent>
         <DialogContent
           sx={{ display: "flex", justifyContent: "flex-end", gap: 1, pt: 0 }}
         >
-          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+          <Button onClick={() => setDeleteDialogOpen(false)}>{t("dialog.cancel")}</Button>
           <Button
             onClick={() => handleConfirmDelete(stripToDelete!)}
             variant="contained"
             color="error"
           >
-            Delete
+            {t("dialog.delete")}
           </Button>
         </DialogContent>
       </Dialog>
@@ -484,21 +485,22 @@ export const SidebarPanel = () => {
         maxWidth="xs"
         fullWidth
       >
-        <DialogTitle>Confirm Status Change</DialogTitle>
+        <DialogTitle>{t("common.confirmStatusChange")}</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to mark this flight strip as{" "}
-            {pendingActiveState ? "active" : "inactive"}?
+            {t("common.statusChangeMessage", {
+              status: pendingActiveState ? t("common.active") : t("common.inactive")
+            })}
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setActiveDialogOpen(false)}>Cancel</Button>
+          <Button onClick={() => setActiveDialogOpen(false)}>{t("dialog.cancel")}</Button>
           <Button
             onClick={handleConfirmToggle}
             variant="contained"
             color="primary"
           >
-            Confirm
+            {t("sidebar.confirmButton")}
           </Button>
         </DialogActions>
       </Dialog>
