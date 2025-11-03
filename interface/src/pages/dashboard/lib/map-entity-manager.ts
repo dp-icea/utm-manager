@@ -71,7 +71,7 @@ export class MapEntityManager {
     this.viewer.cesiumWidget.creditContainer.remove();
     this.viewer.scene.mode = Cesium.SceneMode.SCENE2D;
 
-    const [latitude, longitude] = [-23.713416, -46.693356];
+    const [latitude, longitude] = [-23.701465417218216, -46.696952192815985];
     const cameraAltitude = 5000;
 
     this.viewer.camera.setView({
@@ -298,13 +298,23 @@ export class MapEntityManager {
         );
 
         if (this.flights[id].length > 1) {
-          const label = this.flights[id][1];
-          label.position = Cesium.Cartesian3.fromDegrees(
-            position.lng,
-            position.lat,
-            position.alt + 10,
-            Cesium.Ellipsoid.WGS84,
-          );
+          if (this.viewer.scene.mode === Cesium.SceneMode.SCENE3D) {
+            const label = this.flights[id][1];
+            label.position = Cesium.Cartesian3.fromDegrees(
+              position.lng,
+              position.lat,
+              position.alt + 10,
+              Cesium.Ellipsoid.WGS84,
+            );
+          } else if (this.viewer.scene.mode === Cesium.SceneMode.SCENE2D) {
+            const label = this.flights[id][1];
+            label.position = Cesium.Cartesian3.fromDegrees(
+              position.lng,
+              position.lat + 0.00015,
+              position.alt,
+              Cesium.Ellipsoid.WGS84,
+            );
+          }
         }
       } else {
         this.flights[id] = [];
@@ -333,7 +343,7 @@ export class MapEntityManager {
           ),
           // Replace point with sphere
           ellipsoid: {
-            radii: new Cesium.Cartesian3(5, 5, 5), // Adjust radius as needed
+            radii: new Cesium.Cartesian3(10, 10, 10), // Adjust radius as needed
             material: Cesium.Color.BLACK.withAlpha(0.8),
           },
         });
@@ -341,24 +351,46 @@ export class MapEntityManager {
         this.flights[id].push(entity);
 
         if (newFlight.details?.uas_id || newFlight.id) {
-          const label = this.viewer.entities.add({
-            position: Cesium.Cartesian3.fromDegrees(
-              position.lng,
-              position.lat,
-              position.alt + 10,
-              Cesium.Ellipsoid.WGS84,
-            ),
-            label: {
-              text: newFlight.details?.uas_id.registration_id || newFlight.id,
-              font: "14px sans-serif",
-              fillColor: Cesium.Color.BLACK,
-              outlineColor: Cesium.Color.BLACK,
-              outlineWidth: 2,
-              verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-            },
-          });
-          if (label) {
-            this.flights[id].push(label);
+          if (this.viewer.scene.mode === Cesium.SceneMode.SCENE3D) {
+            const label = this.viewer.entities.add({
+              position: Cesium.Cartesian3.fromDegrees(
+                position.lng,
+                position.lat,
+                position.alt + 10,
+                Cesium.Ellipsoid.WGS84,
+              ),
+              label: {
+                text: newFlight.details?.uas_id.registration_id || newFlight.id,
+                font: "14px sans-serif",
+                fillColor: Cesium.Color.BLACK,
+                outlineColor: Cesium.Color.BLACK,
+                outlineWidth: 2,
+                verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+              },
+            });
+            if (label) {
+              this.flights[id].push(label);
+            }
+          } else if (this.viewer.scene.mode === Cesium.SceneMode.SCENE2D) {
+            const label = this.viewer.entities.add({
+              position: Cesium.Cartesian3.fromDegrees(
+                position.lng,
+                position.lat + 0.00015,
+                position.alt,
+                Cesium.Ellipsoid.WGS84,
+              ),
+              label: {
+                text: newFlight.details?.uas_id.registration_id || newFlight.id,
+                font: "14px sans-serif",
+                fillColor: Cesium.Color.BLACK,
+                outlineColor: Cesium.Color.BLACK,
+                outlineWidth: 2,
+                verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+              },
+            });
+            if (label) {
+              this.flights[id].push(label);
+            }
           }
         }
       }
