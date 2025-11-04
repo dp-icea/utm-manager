@@ -7,6 +7,7 @@ from dataclasses import dataclass
 import httpx
 from config.config import Settings
 from infrastructure.auth_client import BaseClient
+from infrastructure.correlation import CorrelationIdManager
 
 
 @dataclass
@@ -35,7 +36,7 @@ class EventService:
 
         Args:
             event_stream: The event stream name (e.g., "MANAGER_FLIGHT_STRIPS_CREATE")
-            correlation_id: Optional correlation ID for tracking
+            correlation_id: Optional correlation ID for tracking (if empty, uses current context)
 
         Returns:
             bool: True if event was dispatched successfully, False otherwise
@@ -46,12 +47,25 @@ class EventService:
             )
             return False
 
+        # Use provided correlation_id or get from current context
+        if not correlation_id:
+            correlation_id = CorrelationIdManager.get_correlation_id() or ""
+
         payload = EventPayload(
             stream=event_stream, correlation_id=correlation_id
         )
 
         try:
             async with BaseClient(timeout=self.timeout) as client:
+                headers = {
+                    "Content-Type": "application/json",
+                    "User-Agent": "UTM-Manager/1.0.0",
+                }
+
+                # Add correlation ID to headers for external API tracking
+                if payload.correlation_id:
+                    headers["X-Correlation-ID"] = payload.correlation_id
+
                 response = await client.post(
                     f"{self.event_api_url}/api/v1/events/",
                     json={
@@ -59,10 +73,7 @@ class EventService:
                         "version": payload.version,
                         "correlation_id": payload.correlation_id,
                     },
-                    headers={
-                        "Content-Type": "application/json",
-                        "User-Agent": "UTM-Observer/1.0.0",
-                    },
+                    headers=headers,
                 )
 
                 if response.status_code in (200, 201, 202):
@@ -94,11 +105,14 @@ class EventService:
 
         Args:
             event_stream: The event stream name
-            correlation_id: Optional correlation ID for tracking
+            correlation_id: Optional correlation ID for tracking (if empty, uses current context)
         """
         if not self.event_api_url:
             return
 
+        # Use provided correlation_id or get from current context
+        if not correlation_id:
+            correlation_id = CorrelationIdManager.get_correlation_id() or ""
+
         # Create a task that runs in the background without blocking the request
         asyncio.create_task(self.dispatch_event(event_stream, correlation_id))
-
