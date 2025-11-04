@@ -10,7 +10,7 @@ from domain.base import Volume4D
 from schemas.api import ApiResponse
 from schemas.requests.flights import QueryFlightsRequest
 
-router = APIRouter()
+router = APIRouter(tags=["Airspace"], prefix="/airspace")
 
 
 def get_airspace_query_use_case() -> AirspaceQueryUseCase:

@@ -2,12 +2,27 @@
 from datetime import datetime
 from pydantic import BaseModel, Field, model_validator
 from typing import Optional, List
+from bson import ObjectId
 from schemas.enums import (
     AltitudeReference,
     AltitudeUnits,
     RadiusUnits,
     TimeFormat,
 )
+
+
+class BaseEntity(BaseModel):
+    """Base entity class for domain models"""
+    
+    id: Optional[str] = Field(None, description="MongoDB ObjectId as string")
+    
+    class Config:
+        """Pydantic configuration"""
+        validate_by_name = True
+        json_encoders = {
+            ObjectId: str,
+            datetime: lambda v: v.isoformat() if v else None
+        }
 
 
 # Domain value objects

@@ -1,9 +1,21 @@
+import { useState } from "react";
 import {
-  type FlightStrip,
+  type FlightStripUI,
   FLIGHT_AREA_COLORS,
   formatFlightArea,
 } from "@/shared/model";
-import { Box, IconButton, Typography, Chip } from "@mui/material";
+import {
+  Box,
+  IconButton,
+  Typography,
+  Chip,
+  Switch,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
@@ -11,13 +23,22 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useLanguage } from "@/shared/lib/lang";
 
 interface FlightStripCardProps {
-  strip: FlightStrip;
-  onRemove: (id: string) => void;
+  strip: FlightStripUI;
+  onRemove: (name: string) => void;
+  onEdit: (strip: FlightStripUI) => void;
+  onToggle: (strip: FlightStripUI, active: boolean) => void;
 }
 
-const FlightStripCard = ({ strip, onRemove }: FlightStripCardProps) => {
+const FlightStripCard = ({
+  strip,
+  onRemove,
+  onEdit,
+  onToggle,
+}: FlightStripCardProps) => {
+  const { t } = useLanguage();
   const {
     attributes,
     listeners,
@@ -25,19 +46,18 @@ const FlightStripCard = ({ strip, onRemove }: FlightStripCardProps) => {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: strip.id });
+  } = useSortable({ id: strip.name });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
   };
 
-  console.log(FLIGHT_AREA_COLORS);
-
   return (
     <Box
       ref={setNodeRef}
       style={style}
+      onClick={() => onEdit(strip)}
       sx={{
         position: "relative",
         overflow: "hidden",
@@ -46,8 +66,8 @@ const FlightStripCard = ({ strip, onRemove }: FlightStripCardProps) => {
         borderColor: "divider",
         bgcolor: "background.paper",
         transition: "all 0.2s",
-        opacity: isDragging ? 0.5 : 1,
-        cursor: isDragging ? "grabbing" : "grab",
+        opacity: isDragging ? 0.5 : strip.active ? 1 : 0.6,
+        cursor: isDragging ? "grabbing" : "pointer",
         "&:hover": {
           borderColor: "primary.main",
           boxShadow: 2,
@@ -100,7 +120,7 @@ const FlightStripCard = ({ strip, onRemove }: FlightStripCardProps) => {
               fontFamily="monospace"
               fontWeight="bold"
             >
-              {strip.id}
+              {strip.name}
             </Typography>
             <Chip
               label={formatFlightArea(strip.flightArea)}
@@ -113,14 +133,27 @@ const FlightStripCard = ({ strip, onRemove }: FlightStripCardProps) => {
               }}
             />
           </Box>
-          <IconButton
-            size="small"
-            onClick={() => onRemove(strip.id)}
-            className="remove-button"
-            sx={{ opacity: 0, transition: "opacity 0.2s" }}
-          >
-            <CloseIcon fontSize="small" />
-          </IconButton>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            <Switch
+              checked={strip.active}
+              onChange={(e) => {
+                e.stopPropagation();
+                onToggle(strip, e.target.checked);
+              }}
+              onClick={(e) => e.stopPropagation()}
+            />
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemove(strip.name);
+              }}
+              className="remove-button"
+              sx={{ opacity: 0, transition: "opacity 0.2s" }}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Box>
         </Box>
 
         <Box
@@ -131,65 +164,98 @@ const FlightStripCard = ({ strip, onRemove }: FlightStripCardProps) => {
             fontSize: "0.875rem",
           }}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-            <ArrowUpwardIcon sx={{ fontSize: 14, color: "primary.main" }} />
-            <Typography variant="caption" color="text.secondary">
-              Takeoff:
-            </Typography>
-            <Typography variant="caption" fontFamily="monospace">
-              {strip.takeoffSpace}
-            </Typography>
-          </Box>
+          {strip.takeoffSpace && (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              <ArrowUpwardIcon sx={{ fontSize: 14, color: "primary.main" }} />
+              <Typography variant="caption" color="text.secondary">
+                {t("flightStrip.takeoff")}:
+              </Typography>
+              <Typography variant="caption" fontFamily="monospace">
+                {strip.takeoffSpace}
+              </Typography>
+            </Box>
+          )}
 
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-            <ArrowDownwardIcon sx={{ fontSize: 14, color: "primary.main" }} />
-            <Typography variant="caption" color="text.secondary">
-              Landing:
-            </Typography>
-            <Typography variant="caption" fontFamily="monospace">
-              {strip.landingSpace}
-            </Typography>
-          </Box>
+          {strip.landingSpace && (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              <ArrowDownwardIcon sx={{ fontSize: 14, color: "primary.main" }} />
+              <Typography variant="caption" color="text.secondary">
+                {t("flightStrip.landing")}:
+              </Typography>
+              <Typography variant="caption" fontFamily="monospace">
+                {strip.landingSpace}
+              </Typography>
+            </Box>
+          )}
 
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-            <AccessTimeIcon sx={{ fontSize: 14, color: "primary.main" }} />
-            <Typography variant="caption" color="text.secondary">
-              Depart:
-            </Typography>
-            <Typography variant="caption" fontFamily="monospace">
-              {strip.takeoffTime}
-            </Typography>
-          </Box>
+          {strip.takeoffTime && (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              <AccessTimeIcon sx={{ fontSize: 14, color: "primary.main" }} />
+              <Typography variant="caption" color="text.secondary">
+                {t("flightStrip.depart")}:
+              </Typography>
+              <Typography variant="caption" fontFamily="monospace">
+                {strip.takeoffTime}
+              </Typography>
+            </Box>
+          )}
 
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-            <AccessTimeIcon sx={{ fontSize: 14, color: "primary.main" }} />
-            <Typography variant="caption" color="text.secondary">
-              Arrive:
-            </Typography>
-            <Typography variant="caption" fontFamily="monospace">
-              {strip.landingTime}
-            </Typography>
-          </Box>
+          {strip.landingTime && (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              <AccessTimeIcon sx={{ fontSize: 14, color: "primary.main" }} />
+              <Typography variant="caption" color="text.secondary">
+                {t("flightStrip.arrive")}:
+              </Typography>
+              <Typography variant="caption" fontFamily="monospace">
+                {strip.landingTime}
+              </Typography>
+            </Box>
+          )}
 
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 0.5,
-              gridColumn: "span 2",
-            }}
-          >
-            <Typography variant="caption" color="text.secondary">
-              Height:
-            </Typography>
-            <Typography
-              variant="caption"
-              fontFamily="monospace"
-              fontWeight="bold"
+          {strip.height && (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 0.5,
+                gridColumn: "span 2",
+              }}
             >
-              {strip.height}m
-            </Typography>
-          </Box>
+              <Typography variant="caption" color="text.secondary">
+                {t("flightStrip.height")}:
+              </Typography>
+              <Typography
+                variant="caption"
+                fontFamily="monospace"
+                fontWeight="bold"
+              >
+                {strip.height}m
+              </Typography>
+            </Box>
+          )}
+
+          {strip.description && (
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 0.25,
+                gridColumn: "span 2",
+                mt: 0.5,
+              }}
+            >
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                fontWeight="bold"
+              >
+                Description:
+              </Typography>
+              <Typography variant="caption" sx={{ fontStyle: "italic" }}>
+                {strip.description}
+              </Typography>
+            </Box>
+          )}
         </Box>
       </Box>
     </Box>

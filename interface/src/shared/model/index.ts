@@ -11,3 +11,5 @@ export * from "./operational-intent.d";
 export * from "./subscription.d";
 export * from "./uss.d";
 export * from "./flight-strip.d";
+export * from "./drone-mapping.d";
+export * from "./drone-mapping";

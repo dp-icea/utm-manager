@@ -1,9 +1,13 @@
+import * as Cesium from "cesium";
 import { useState, type ReactNode } from "react";
 import { format } from "date-fns";
-import {
-  MapState
+import { MapState } from "@/shared/model";
+import type {
+  Constraint,
+  OperationalIntent,
+  IdentificationServiceAreaFull,
+  Flight,
 } from "@/shared/model";
-import type { Constraint, OperationalIntent, IdentificationServiceAreaFull, Flight } from "@/shared/model";
 import { MapContext } from "./context";
 
 export interface FilterCategory {
@@ -29,6 +33,10 @@ export const MapProvider = ({ children }: { children: ReactNode }) => {
   const [loadingConstraintRequest, setLoadingConstraintRequest] =
     useState<boolean>(false);
 
+  const [sceneMode, setSceneMode] = useState<Cesium.SceneMode>(
+    Cesium.SceneMode.SCENE2D,
+  );
+
   const [filters, setFilters] = useState<FilterCategory[]>([
     {
       id: "operational-intents",
@@ -46,7 +54,7 @@ export const MapProvider = ({ children }: { children: ReactNode }) => {
   const [mapState, setMapState] = useState<MapState>(MapState.ONLINE);
 
   // This is default false to allow backup values in the timeline
-  const [isLive, setIsLive] = useState<boolean>(false);
+  const [isLive, setIsLive] = useState<boolean>(true);
 
   const [flights, setFlights] = useState<Flight[]>([]);
 
@@ -54,6 +62,8 @@ export const MapProvider = ({ children }: { children: ReactNode }) => {
   const [flightProvidersFilter, setFlightProvidersFilter] = useState<string[]>(
     [],
   );
+
+  const [viewer, setViewer] = useState<Cesium.Viewer | null>(null);
 
   return (
     <MapContext.Provider
@@ -88,6 +98,10 @@ export const MapProvider = ({ children }: { children: ReactNode }) => {
         setFlightsFilter,
         flightProvidersFilter,
         setFlightProvidersFilter,
+        sceneMode,
+        setSceneMode,
+        viewer,
+        setViewer,
       }}
     >
       {children}

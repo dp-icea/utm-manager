@@ -1,3 +1,4 @@
+import { Box } from "@mui/material";
 import { Component } from "react";
 import { Terrain, Ion } from "cesium";
 import * as Cesium from "cesium";
@@ -16,7 +17,12 @@ export class MapViewer extends Component {
     }
 
     return (
-      <div className="absolute inset-0">
+      <Box
+        sx={{
+          width: "100%",
+          height: "100%",
+        }}
+      >
         <Viewer
           terrain={Terrain.fromWorldTerrain()}
           selectionIndicator={false}
@@ -37,14 +43,16 @@ export class MapViewer extends Component {
           <ImageryLayer
             imageryProvider={
               new Cesium.OpenStreetMapImageryProvider({
-                url: "https://a.tile.openstreetmap.org",
+                // url: "https://a.tile.openstreetmap.org",
+                // url: "https://cartodb-basemaps-a.global.ssl.fastly.net/light_all/",
+                url: "https://a.tile.openstreetmap.fr/hot/",
               })
             }
             show={true}
           />
           {/*<Cesium3DTileset url={IonResource.fromAssetId(96188)} />*/}
         </Viewer>
-      </div>
+      </Box>
     );
   }
 }

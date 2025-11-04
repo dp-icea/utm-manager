@@ -13,9 +13,11 @@ import {
 import { useMap } from "../../../contexts/MapContext";
 import { constraintManagementService } from "../api/constraintApi";
 import { toast } from "../../../shared/hooks";
+import { useLanguage } from "@/shared/lib/lang";
 
 export const ConstraintManagementPanel = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { t } = useLanguage();
 
   const { loadingConstraintRequest, setLoadingConstraintRequest } = useMap();
 
@@ -77,10 +79,10 @@ export const ConstraintManagementPanel = () => {
             }}
           >
             <DialogHeader>
-              <DialogTitle>Confirm Constraint Creation</DialogTitle>
+              <DialogTitle>{t("constraints.confirmCreation")}</DialogTitle>
               <DialogDescription>
-                Are you sure you want to create a constraint? The constraint will be placed at
-                <strong> Instituto de Estudos Avançados (IEAv)</strong> and will last for <strong>3 minutes</strong>.
+                {t("constraints.confirmMessage")}
+                <strong> {t("constraints.ieav")}</strong> {t("constraints.duration")} <strong>{t("constraints.minutes")}</strong>.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>

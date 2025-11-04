@@ -8,6 +8,7 @@ from threading import Lock
 from config.config import Settings
 from schemas.enums import Authority
 from schemas.api import ApiException
+from infrastructure.correlation import CorrelationIdManager
 import logging
 
 
@@ -24,6 +25,13 @@ class BaseClient(httpx.AsyncClient):
         self, method: str, url: httpx.URL | str, **kwargs: Any
     ) -> httpx.Response:
         try:
+            # Inject correlation ID into headers if available
+            correlation_id = CorrelationIdManager.get_correlation_id()
+            if correlation_id:
+                headers = kwargs.get('headers', {})
+                headers['X-Correlation-ID'] = correlation_id
+                kwargs['headers'] = headers
+            
             logging.info(
                 f"[EXTERNAL REQUEST] {method} {self.base_url}{url}"
                 f". Args: {kwargs}"

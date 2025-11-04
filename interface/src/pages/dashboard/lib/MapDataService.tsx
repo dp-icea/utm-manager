@@ -78,9 +78,11 @@ export const MapDataService = () => {
     setFlights,
     flightsFilter,
     flightProvidersFilter,
+    sceneMode,
+    setViewer,
   } = useMap();
 
-  const { activeStripIds, setActiveStripIds } = useStrips();
+  const { activeStripIds, setActiveStripIds, strips } = useStrips();
 
   const getTimeRange: () => TimeRange = () => {
     const startDateTime = new Date(
@@ -169,10 +171,10 @@ export const MapDataService = () => {
       const fetchedVolumes: Array<
         OperationalIntent | Constraint | IdentificationServiceAreaFull
       > = [
-        ...res.constraints,
-        ...res.operational_intents,
-        ...res.identification_service_areas,
-      ];
+          ...res.constraints,
+          ...res.operational_intents,
+          ...res.identification_service_areas,
+        ];
 
       localVolumes.current = fetchedVolumes.slice();
       setVolumes(fetchedVolumes);
@@ -250,6 +252,8 @@ export const MapDataService = () => {
   };
 
   const triggerFetchVolumes = async () => {
+    return;
+
     if (!controller.current) return;
 
     setLoading(true);
@@ -267,7 +271,8 @@ export const MapDataService = () => {
     if (!controller.current) return;
 
     setLoading(true);
-    const viewRectangle = controller.current.getViewRectangle();
+    // const viewRectangle = controller.current.getViewRectangle();
+    const viewRectangle = controller.current.getFixedViewInterlagosRectangle();
     if (viewRectangle) {
       await fetchFlights(viewRectangle);
     }
@@ -284,27 +289,25 @@ export const MapDataService = () => {
   const onViewerStart: React.EffectCallback = () => {
     if (!viewer || controller.current) return;
 
-    console.log("=== On Viewer Start");
-
     controller.current = new MapEntityManager(viewer);
+    setViewer(viewer);
 
     timeRange.current = getTimeRange();
 
-    controller.current.addMoveEndCallback(() => {
-      if (constantVolumeFetch.current) {
-        clearInterval(constantVolumeFetch.current);
-      }
-      constantVolumeFetch.current = setInterval(() => {
-        triggerFetchVolumes();
-      }, VOLUME_FETCH_INTERVAL);
-    });
+    if (isLive) {
+      if (liveInterval.current) return;
 
-    if (constantVolumeFetch.current) {
-      clearInterval(constantVolumeFetch.current);
+      liveInterval.current = setInterval(() => {
+        const startTime = new Date();
+        const endTime = addSeconds(startTime, 10);
+        timeRange.current = { startTime, endTime };
+
+        triggerFetchFlights();
+      }, FLIGHT_FETCH_INTERVAL);
     }
-    constantVolumeFetch.current = setInterval(() => {
-      triggerFetchVolumes();
-    }, VOLUME_FETCH_INTERVAL);
+
+    // Refresh drone mappings when map is initialized
+    controller.current.refreshDroneMappings();
 
     controller.current.addSelectedEntitiesChangeCallback(
       (entities: Set<Cesium.Entity>) => {
@@ -337,21 +340,12 @@ export const MapDataService = () => {
   const onInterfaceUpdate: React.EffectCallback = () => {
     if (!controller.current) return;
 
-    updateVolumes();
+    // updateVolumes();
     updateFlights();
   };
 
   const getFilteredFlights = (flights: Array<Flight>): Array<Flight> => {
     return flights.filter((flight) => {
-      // Filter by selected providers
-      if (
-        !flightProvidersFilter.includes(
-          flight.identification_service_area.owner,
-        )
-      ) {
-        return false;
-      }
-
       // Filter by selected flights
       if (!flightsFilter.includes(flight.id)) {
         return false;
@@ -366,8 +360,12 @@ export const MapDataService = () => {
 
     if (!isLive) return;
 
-    const filteredFlights = getFilteredFlights(flights);
-    controller.current.displayFlights(filteredFlights);
+    // console.log("=== Displaying Filtered Flights ===");
+    // console.log(flights);
+    // const filteredFlights = getFilteredFlights(flights);
+    // console.log("=== Displaying Filtered Flights ===");
+    // console.log(filteredFlights);
+    controller.current.displayFlights(flights);
   };
 
   const onFlightsUpdate: React.EffectCallback = () => {
@@ -406,6 +404,12 @@ export const MapDataService = () => {
     controller.current.updateSelectedEntities(activeStripIds);
   };
 
+  const onStripsChange: React.EffectCallback = () => {
+    if (!controller.current) return;
+
+    controller.current.updateStrips(strips);
+  };
+
   // Object state on the dynamic input
   useEffect(onActiveStripsChange, [activeStripIds]);
   useEffect(onViewerStart, [viewer]);
@@ -423,6 +427,15 @@ export const MapDataService = () => {
   useEffect(onLiveToggle, [isLive]);
 
   useEffect(() => {
+    // Add window focus listener to refresh drone mappings when returning to dashboard
+    const handleWindowFocus = () => {
+      if (controller.current) {
+        controller.current.refreshDroneMappings();
+      }
+    };
+
+    window.addEventListener('focus', handleWindowFocus);
+
     return () => {
       if (constantVolumeFetch.current) {
         clearInterval(constantVolumeFetch.current);
@@ -431,8 +444,17 @@ export const MapDataService = () => {
         clearInterval(liveInterval.current);
       }
       controller.current = null;
+      window.removeEventListener('focus', handleWindowFocus);
     };
   }, []);
+
+  useEffect(onStripsChange, [strips]);
+
+  useEffect(() => {
+    if (!controller.current) return;
+
+    controller.current.setSceneMode(sceneMode);
+  });
 
   return null;
 };
