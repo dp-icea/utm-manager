@@ -76,7 +76,8 @@ const translations: Record<Language, Record<string, string>> = {
     "droneMapping.saved": "Drone mappings saved successfully",
     "droneMapping.configuration": "Drone Mapping Configuration",
     "droneMapping.mappings": "Drone Mappings",
-    "droneMapping.csvFormat": "CSV format: Id, Serial Number, SISANT (with or without header row)",
+    "droneMapping.csvFormat":
+      "CSV format: Id, Serial Number, SISANT (with or without header row)",
     "droneMapping.idName": "ID / Name",
     "droneMapping.serialNumberSN": "Serial Number (SN)",
     "droneMapping.sisantNumber": "SISANT Number",
@@ -118,16 +119,19 @@ const translations: Record<Language, Record<string, string>> = {
     "common.confirm": "Confirm",
     "common.confirmDeletion": "Confirm Deletion",
     "common.confirmStatusChange": "Confirm Status Change",
-    "common.deleteConfirmMessage": "Are you sure you want to delete flight strip {{id}}? This action cannot be undone.",
-    "common.statusChangeMessage": "Are you sure you want to mark this flight strip as {{status}}?",
+    "common.deleteConfirmMessage":
+      "Are you sure you want to delete flight strip {{id}}? This action cannot be undone.",
+    "common.statusChangeMessage":
+      "Are you sure you want to mark this flight strip as {{status}}?",
     "common.active": "active",
     "common.inactive": "inactive",
     "common.flightArea": "Flight Area",
-    "common.id": "ID",
+    "common.id": "Drone ID/Drone Name",
 
     // Constraints
     "constraints.confirmCreation": "Confirm Constraint Creation",
-    "constraints.confirmMessage": "Are you sure you want to create a constraint? The constraint will be placed at",
+    "constraints.confirmMessage":
+      "Are you sure you want to create a constraint? The constraint will be placed at",
     "constraints.ieav": "Instituto de Estudos Avançados (IEAv)",
     "constraints.duration": "and will last for",
     "constraints.minutes": "3 minutes",
@@ -237,7 +241,8 @@ const translations: Record<Language, Record<string, string>> = {
     "droneMapping.saved": "Mapeamentos de drones salvos com sucesso",
     "droneMapping.configuration": "Configuração de Mapeamento de Drones",
     "droneMapping.mappings": "Mapeamentos de Drones",
-    "droneMapping.csvFormat": "Formato CSV: Id, Número de Série, SISANT (com ou sem linha de cabeçalho)",
+    "droneMapping.csvFormat":
+      "Formato CSV: Id, Número de Série, SISANT (com ou sem linha de cabeçalho)",
     "droneMapping.idName": "ID / Nome",
     "droneMapping.serialNumberSN": "Número de Série (SN)",
     "droneMapping.sisantNumber": "Número SISANT",
@@ -245,10 +250,12 @@ const translations: Record<Language, Record<string, string>> = {
     "droneMapping.enterIdName": "Digite ID ou Nome",
     "droneMapping.enterSerialNumber": "Digite Número de Série",
     "droneMapping.enterSisant": "Digite SISANT",
-    "droneMapping.loadedFromCSV": "{{count}} mapeamentos de drones carregados do CSV",
+    "droneMapping.loadedFromCSV":
+      "{{count}} mapeamentos de drones carregados do CSV",
     "droneMapping.noValidData": "Nenhum dado válido encontrado no arquivo CSV",
     "droneMapping.csvParseError": "Falha ao analisar arquivo CSV",
-    "droneMapping.addAtLeastOne": "Por favor, adicione pelo menos um mapeamento de drone",
+    "droneMapping.addAtLeastOne":
+      "Por favor, adicione pelo menos um mapeamento de drone",
     "droneMapping.loadError": "Falha ao carregar mapeamentos de drones",
     "droneMapping.saveError": "Falha ao salvar mapeamentos de drones",
 
@@ -279,16 +286,19 @@ const translations: Record<Language, Record<string, string>> = {
     "common.confirm": "Confirmar",
     "common.confirmDeletion": "Confirmar Exclusão",
     "common.confirmStatusChange": "Confirmar Mudança de Status",
-    "common.deleteConfirmMessage": "Tem certeza de que deseja excluir a tira de voo {{id}}? Esta ação não pode ser desfeita.",
-    "common.statusChangeMessage": "Tem certeza de que deseja marcar esta tira de voo como {{status}}?",
+    "common.deleteConfirmMessage":
+      "Tem certeza de que deseja excluir a tira de voo {{id}}? Esta ação não pode ser desfeita.",
+    "common.statusChangeMessage":
+      "Tem certeza de que deseja marcar esta tira de voo como {{status}}?",
     "common.active": "ativa",
     "common.inactive": "inativa",
     "common.flightArea": "Área de Voo",
-    "common.id": "ID",
+    "common.id": "ID do Drone/Nome do Drone",
 
     // Constraints
     "constraints.confirmCreation": "Confirmar Criação de Restrição",
-    "constraints.confirmMessage": "Tem certeza de que deseja criar uma restrição? A restrição será colocada em",
+    "constraints.confirmMessage":
+      "Tem certeza de que deseja criar uma restrição? A restrição será colocada em",
     "constraints.ieav": "Instituto de Estudos Avançados (IEAv)",
     "constraints.duration": "e durará por",
     "constraints.minutes": "3 minutos",
