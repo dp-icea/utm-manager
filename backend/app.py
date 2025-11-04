@@ -8,8 +8,11 @@ from routes.airspace import router as AirspaceRouter
 from routes.constraints import router as ConstraintsRouter
 from routes.health import router as HealthRouter
 from routes.flight_strips import router as FlightStripsRouter
+from routes.drone_mappings import router as DroneMappingsRouter
 from infrastructure.mongodb_client import mongodb_client
 from infrastructure.event_service import EventService
+from infrastructure.correlation import setup_correlation_logging, CorrelationIdManager
+from middleware.correlation import CorrelationIdMiddleware
 from config.config import Settings
 from config.event_mappings import get_event_stream_for_request
 from schemas.api import ApiException
@@ -71,6 +74,9 @@ logging.basicConfig(
     level=logging.DEBUG,
 )
 
+# Setup correlation ID logging
+setup_correlation_logging()
+
 
 @app.middleware("http")
 async def dispatch_events_middleware(request: Request, call_next):
@@ -89,13 +95,8 @@ async def dispatch_events_middleware(request: Request, call_next):
             )
 
             if event_stream:
-                # Extract correlation ID from headers if available
-                correlation_id = request.headers.get("X-Correlation-ID", "")
-
-                # Dispatch event asynchronously (fire-and-forget)
-                event_service.dispatch_event_async(
-                    event_stream, correlation_id
-                )
+                # Dispatch event asynchronously (correlation ID will be automatically retrieved from context)
+                event_service.dispatch_event_async(event_stream)
 
                 logging.debug(
                     f"Event dispatched: {event_stream} for"
@@ -117,6 +118,9 @@ async def dispatch_events_middleware(request: Request, call_next):
 @app.middleware("http")
 async def catch_exceptions_middleware(request: Request, call_next):
     try:
+        # Get correlation ID for logging (will be available from correlation middleware)
+        correlation_id = CorrelationIdManager.get_correlation_id()
+        
         logging.info(
             f"[API REQUEST] {request.method} {request.url.path} - "
             f"Headers: {request.headers}, "
@@ -146,6 +150,9 @@ async def catch_exceptions_middleware(request: Request, call_next):
         )
 
 
+# Add correlation ID middleware (should be added early in the middleware stack)
+app.add_middleware(CorrelationIdMiddleware)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -158,3 +165,4 @@ app.include_router(AirspaceRouter, tags=["Airspace"])
 app.include_router(ConstraintsRouter, tags=["Constraints"])
 app.include_router(HealthRouter, tags=["Health"])
 app.include_router(FlightStripsRouter, tags=["Flight Strips"])
+app.include_router(DroneMappingsRouter, tags=["Drone Mappings"])

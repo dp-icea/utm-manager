@@ -2,6 +2,7 @@
 
 from typing import List
 from datetime import datetime
+from typing import Optional
 from pydantic import BaseModel
 
 from schemas.requests.flight_strip import FlightArea
@@ -12,11 +13,13 @@ class FlightStripResponse(BaseModel):
 
     name: str
     flight_area: FlightArea
-    height: int
-    takeoff_space: str
-    landing_space: str
-    takeoff_time: str
-    landing_time: str
+    height: Optional[int]
+    takeoff_space: Optional[str]
+    landing_space: Optional[str]
+    takeoff_time: Optional[str]
+    landing_time: Optional[str]
+    description: Optional[str]
+    active: bool
     created_at: datetime
     updated_at: datetime
     
@@ -31,6 +34,8 @@ class FlightStripResponse(BaseModel):
             landing_space=flight_strip.landing_space,
             takeoff_time=flight_strip.takeoff_time,
             landing_time=flight_strip.landing_time,
+            description=flight_strip.description,
+            active=flight_strip.active,
             created_at=flight_strip.created_at,
             updated_at=flight_strip.updated_at,
         )

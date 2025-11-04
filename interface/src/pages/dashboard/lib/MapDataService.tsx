@@ -78,9 +78,11 @@ export const MapDataService = () => {
     setFlights,
     flightsFilter,
     flightProvidersFilter,
+    sceneMode,
+    setViewer,
   } = useMap();
 
-  const { activeStripIds, setActiveStripIds } = useStrips();
+  const { activeStripIds, setActiveStripIds, strips } = useStrips();
 
   const getTimeRange: () => TimeRange = () => {
     const startDateTime = new Date(
@@ -269,7 +271,8 @@ export const MapDataService = () => {
     if (!controller.current) return;
 
     setLoading(true);
-    const viewRectangle = controller.current.getViewRectangle();
+    // const viewRectangle = controller.current.getViewRectangle();
+    const viewRectangle = controller.current.getFixedViewInterlagosRectangle();
     if (viewRectangle) {
       await fetchFlights(viewRectangle);
     }
@@ -287,6 +290,7 @@ export const MapDataService = () => {
     if (!viewer || controller.current) return;
 
     controller.current = new MapEntityManager(viewer);
+    setViewer(viewer);
 
     timeRange.current = getTimeRange();
 
@@ -301,6 +305,9 @@ export const MapDataService = () => {
         triggerFetchFlights();
       }, FLIGHT_FETCH_INTERVAL);
     }
+
+    // Refresh drone mappings when map is initialized
+    controller.current.refreshDroneMappings();
 
     controller.current.addSelectedEntitiesChangeCallback(
       (entities: Set<Cesium.Entity>) => {
@@ -397,6 +404,12 @@ export const MapDataService = () => {
     controller.current.updateSelectedEntities(activeStripIds);
   };
 
+  const onStripsChange: React.EffectCallback = () => {
+    if (!controller.current) return;
+
+    controller.current.updateStrips(strips);
+  };
+
   // Object state on the dynamic input
   useEffect(onActiveStripsChange, [activeStripIds]);
   useEffect(onViewerStart, [viewer]);
@@ -414,6 +427,15 @@ export const MapDataService = () => {
   useEffect(onLiveToggle, [isLive]);
 
   useEffect(() => {
+    // Add window focus listener to refresh drone mappings when returning to dashboard
+    const handleWindowFocus = () => {
+      if (controller.current) {
+        controller.current.refreshDroneMappings();
+      }
+    };
+
+    window.addEventListener('focus', handleWindowFocus);
+
     return () => {
       if (constantVolumeFetch.current) {
         clearInterval(constantVolumeFetch.current);
@@ -422,8 +444,17 @@ export const MapDataService = () => {
         clearInterval(liveInterval.current);
       }
       controller.current = null;
+      window.removeEventListener('focus', handleWindowFocus);
     };
   }, []);
+
+  useEffect(onStripsChange, [strips]);
+
+  useEffect(() => {
+    if (!controller.current) return;
+
+    controller.current.setSceneMode(sceneMode);
+  });
 
   return null;
 };

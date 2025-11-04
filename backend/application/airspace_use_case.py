@@ -88,7 +88,7 @@ class AirspaceQueryUseCase:
 
         return AirspaceFlights(
             timestamp=datetime.now(),
-            flights=flights,
+            flights=flights + generate_flight_mock_data(),
             # flights=generate_flight_mock_data(),
         )
 

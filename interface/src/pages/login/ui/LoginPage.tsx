@@ -1,10 +1,19 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-
+import { TextField } from "@mui/material";
 import { ROUTES } from "@/shared/config";
-import { Button, Input, Label, Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
+import {
+  Button,
+  Input,
+  Label,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/ui";
 import LogoBRUTM from "@/shared/assets/logo.svg";
 import { useToast, useAuth } from "@/shared/lib/hook";
+import { useLanguage } from "@/shared/lib/lang";
 
 export const LoginPage = () => {
   const [username, setUsername] = useState("");
@@ -12,6 +21,7 @@ export const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { login } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || ROUTES.DASHBOARD;
@@ -46,8 +56,8 @@ export const LoginPage = () => {
         const token = generateJWT();
         sessionStorage.setItem("accessToken", token);
         toast({
-          title: "Login Successful",
-          description: "Welcome to the BR-UTM monitoring system",
+          title: t("login.success"),
+          description: t("login.welcomeMessage"),
         });
 
         login();
@@ -55,8 +65,8 @@ export const LoginPage = () => {
         navigate(from, { replace: true });
       } else {
         toast({
-          title: "Login Failed",
-          description: "Invalid username or password",
+          title: t("login.failed"),
+          description: t("login.invalidCredentials"),
           variant: "destructive",
         });
       }
@@ -74,48 +84,40 @@ export const LoginPage = () => {
             className="h-30 w-30 rounded-full"
           />
           <CardTitle className="text-2xl text-center text-white">
-            BR-UTM
+            {t("login.title")}
           </CardTitle>
           <p className="text-sm text-center text-gray-400">
-            Sign in to access the monitoring system
+            {t("login.subtitle")}
           </p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="username" className="text-gray-300">
-                Username
-              </Label>
-              <Input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter username"
-                required
-                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-gray-300">
-                Password
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter password"
-                required
-                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-              />
-            </div>
+            <TextField
+              fullWidth
+              label={t("login.username")}
+              variant="outlined"
+              margin="normal"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              autoFocus
+            />
+            <TextField
+              fullWidth
+              label={t("login.password")}
+              type="password"
+              variant="outlined"
+              margin="normal"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
             <Button
               type="submit"
               className="w-full bg-blue-600 hover:bg-blue-700 text-white"
               disabled={isLoading}
             >
-              {isLoading ? "Signing in..." : "Sign In"}
+              {isLoading ? t("login.signingIn") : t("login.signIn")}
             </Button>
           </form>
         </CardContent>

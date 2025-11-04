@@ -1,3 +1,4 @@
+import * as Cesium from "cesium";
 import { useState, type ReactNode } from "react";
 import { format } from "date-fns";
 import { MapState } from "@/shared/model";
@@ -32,6 +33,10 @@ export const MapProvider = ({ children }: { children: ReactNode }) => {
   const [loadingConstraintRequest, setLoadingConstraintRequest] =
     useState<boolean>(false);
 
+  const [sceneMode, setSceneMode] = useState<Cesium.SceneMode>(
+    Cesium.SceneMode.SCENE2D,
+  );
+
   const [filters, setFilters] = useState<FilterCategory[]>([
     {
       id: "operational-intents",
@@ -57,6 +62,8 @@ export const MapProvider = ({ children }: { children: ReactNode }) => {
   const [flightProvidersFilter, setFlightProvidersFilter] = useState<string[]>(
     [],
   );
+
+  const [viewer, setViewer] = useState<Cesium.Viewer | null>(null);
 
   return (
     <MapContext.Provider
@@ -91,6 +98,10 @@ export const MapProvider = ({ children }: { children: ReactNode }) => {
         setFlightsFilter,
         flightProvidersFilter,
         setFlightProvidersFilter,
+        sceneMode,
+        setSceneMode,
+        viewer,
+        setViewer,
       }}
     >
       {children}

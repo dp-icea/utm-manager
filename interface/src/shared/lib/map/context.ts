@@ -1,3 +1,4 @@
+import * as Cesium from "cesium";
 import type {
   Constraint,
   IdentificationServiceAreaFull,
@@ -45,6 +46,10 @@ export interface IMapContext {
   setFlightsFilter: (flights: string[]) => void;
   flightProvidersFilter: string[];
   setFlightProvidersFilter: (flights: string[]) => void;
+  sceneMode: Cesium.SceneMode;
+  setSceneMode: (mode: Cesium.SceneMode) => void;
+  viewer: Cesium.Viewer | null;
+  setViewer: (viewer: Cesium.Viewer | null) => void;
 }
 
 export const MapContext = createContext<IMapContext | undefined>(undefined);

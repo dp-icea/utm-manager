@@ -53,9 +53,9 @@ class FlightStripMongoDBAdapter(FlightStripRepositoryPort):
     async def create(self, flight_strip: FlightStrip) -> FlightStrip:
         """Create a new flight strip"""
         try:
-            # Check if name already exists
+            # Check if name already exists (including soft-deleted ones)
             existing = await self.collection.find_one(
-                {"name": flight_strip.name}
+                {"name": flight_strip.name, "is_deleted": {"$ne": True}}
             )
             if existing:
                 raise ValueError(
@@ -81,10 +81,10 @@ class FlightStripMongoDBAdapter(FlightStripRepositoryPort):
             raise
 
     async def get_by_id(self, flight_strip_id: str) -> Optional[FlightStrip]:
-        """Retrieve flight strip by ID"""
+        """Retrieve flight strip by ID (excludes soft-deleted by default)"""
         try:
             doc = await self.collection.find_one(
-                {"_id": ObjectId(flight_strip_id)}
+                {"_id": ObjectId(flight_strip_id), "is_deleted": {"$ne": True}}
             )
             return self._from_document(doc) if doc else None
         except Exception as e:
@@ -96,9 +96,11 @@ class FlightStripMongoDBAdapter(FlightStripRepositoryPort):
     async def get_by_flight_name(
         self, flight_name: str
     ) -> Optional[FlightStrip]:
-        """Retrieve flight strip by flight name"""
+        """Retrieve flight strip by flight name (excludes soft-deleted by default)"""
         try:
-            doc = await self.collection.find_one({"name": flight_name})
+            doc = await self.collection.find_one(
+                {"name": flight_name, "is_deleted": {"$ne": True}}
+            )
             return self._from_document(doc) if doc else None
         except Exception as e:
             logging.error(
@@ -117,12 +119,12 @@ class FlightStripMongoDBAdapter(FlightStripRepositoryPort):
             doc = self._to_document(flight_strip)
 
             result = await self.collection.replace_one(
-                {"_id": ObjectId(flight_strip.id)}, doc
+                {"name": flight_strip.name}, doc
             )
 
             if result.matched_count == 0:
                 raise ValueError(
-                    f"Flight strip with ID {flight_strip.id} not found"
+                    f"Flight strip with ID {flight_strip.name} not found"
                 )
 
             return flight_strip
@@ -147,9 +149,11 @@ class FlightStripMongoDBAdapter(FlightStripRepositoryPort):
             return False
 
     async def list_all(self) -> List[FlightStrip]:
-        """Get all flight strips"""
+        """Get all flight strips (excludes soft-deleted by default)"""
         try:
-            cursor = self.collection.find({}).sort("created_at", -1)
+            cursor = self.collection.find({"is_deleted": {"$ne": True}}).sort(
+                "created_at", -1
+            )
             docs = await cursor.to_list(length=None)
             return [self._from_document(doc) for doc in docs]
         except Exception as e:
@@ -159,10 +163,10 @@ class FlightStripMongoDBAdapter(FlightStripRepositoryPort):
     async def list_by_flight_area(
         self, flight_area: FlightArea
     ) -> List[FlightStrip]:
-        """Get flight strips by flight area"""
+        """Get flight strips by flight area (excludes soft-deleted by default)"""
         try:
             cursor = self.collection.find(
-                {"flight_area": flight_area.value}
+                {"flight_area": flight_area.value, "is_deleted": {"$ne": True}}
             ).sort("takeoff_time", 1)
             docs = await cursor.to_list(length=None)
             return [self._from_document(doc) for doc in docs]
@@ -181,9 +185,9 @@ class FlightStripMongoDBAdapter(FlightStripRepositoryPort):
         limit: int = 100,
         offset: int = 0,
     ) -> List[FlightStrip]:
-        """Search flight strips with filters"""
+        """Search flight strips with filters (excludes soft-deleted by default)"""
         try:
-            query = {}
+            query = {"is_deleted": {"$ne": True}}
 
             if flight_area:
                 query["flight_area"] = flight_area.value
@@ -212,9 +216,10 @@ class FlightStripMongoDBAdapter(FlightStripRepositoryPort):
             return []
 
     async def count_by_flight_area(self) -> dict:
-        """Get count of flight strips grouped by flight area"""
+        """Get count of flight strips grouped by flight area (excludes soft-deleted)"""
         try:
             pipeline = [
+                {"$match": {"is_deleted": {"$ne": True}}},
                 {"$group": {"_id": "$flight_area", "count": {"$sum": 1}}},
                 {"$sort": {"_id": 1}},
             ]
@@ -228,11 +233,91 @@ class FlightStripMongoDBAdapter(FlightStripRepositoryPort):
             logging.error(f"Error counting flight strips by flight area: {e}")
             return {}
 
+    async def soft_delete(
+        self, flight_strip_name: str, deleted_by: Optional[str] = None
+    ) -> bool:
+        """Soft delete flight strip by name"""
+        try:
+            # Check if flight strip exists and is not already deleted
+            existing = await self.collection.find_one(
+                {"name": flight_strip_name, "is_deleted": {"$ne": True}}
+            )
+            if not existing:
+                return False
+
+            # Mark as deleted
+            result = await self.collection.update_one(
+                {"name": flight_strip_name, "is_deleted": {"$ne": True}},
+                {
+                    "$set": {
+                        "is_deleted": True,
+                        "deleted_at": datetime.utcnow(),
+                        "deleted_by": deleted_by,
+                        "updated_at": datetime.utcnow(),
+                    }
+                },
+            )
+            return result.modified_count > 0
+        except Exception as e:
+            logging.error(
+                f"Error soft deleting flight strip {flight_strip_name}: {e}"
+            )
+            return False
+
+    async def restore(self, flight_strip_name: str) -> bool:
+        """Restore a soft-deleted flight strip"""
+        try:
+            # Check if flight strip exists and is deleted
+            existing = await self.collection.find_one(
+                {"name": flight_strip_name, "is_deleted": True}
+            )
+            if not existing:
+                return False
+
+            # Restore the flight strip
+            result = await self.collection.update_one(
+                {"name": flight_strip_name},
+                {
+                    "$set": {
+                        "is_deleted": False,
+                        "updated_at": datetime.utcnow(),
+                    },
+                    "$unset": {"deleted_at": "", "deleted_by": ""},
+                },
+            )
+            return result.modified_count > 0
+        except Exception as e:
+            logging.error(
+                f"Error restoring flight strip {flight_strip_name}: {e}"
+            )
+            return False
+
+    async def list_deleted(self) -> List[FlightStrip]:
+        """Get all soft-deleted flight strips"""
+        try:
+            cursor = self.collection.find({"is_deleted": True}).sort(
+                "deleted_at", -1
+            )
+            docs = await cursor.to_list(length=None)
+            return [self._from_document(doc) for doc in docs]
+        except Exception as e:
+            logging.error(f"Error listing deleted flight strips: {e}")
+            return []
+
+    async def count_deleted(self) -> int:
+        """Get count of soft-deleted flight strips"""
+        try:
+            count = await self.collection.count_documents({"is_deleted": True})
+            return count
+        except Exception as e:
+            logging.error(f"Error counting deleted flight strips: {e}")
+            return 0
+
     async def exists(self, flight_strip_id: str) -> bool:
-        """Check if flight strip exists"""
+        """Check if flight strip exists (excludes soft-deleted)"""
         try:
             count = await self.collection.count_documents(
-                {"_id": ObjectId(flight_strip_id)}
+                {"_id": ObjectId(flight_strip_id), "is_deleted": {"$ne": True}}
             )
             return count > 0
         except Exception as e:

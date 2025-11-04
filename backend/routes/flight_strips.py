@@ -52,6 +52,8 @@ async def create_flight_strip(
         landing_space=request.landing_space,
         takeoff_time=request.takeoff_time,
         landing_time=request.landing_time,
+        description=request.description,
+        active=request.active,
     )
 
     created_strip = await use_case.create_flight_strip(flight_strip)
@@ -65,17 +67,38 @@ async def create_flight_strip(
     "/{flight_strip_name}",
     response_model=FlightStripDeletedResponse,
     summary="Delete Flight Strip",
-    description="Delete a flight strip by its name",
+    description="Soft delete a flight strip by its name (can be restored later)",
 )
 async def delete_flight_strip(
-    flight_strip_name: str = Path(..., description="Flight strip database ID"),
+    flight_strip_name: str = Path(..., description="Flight strip name"),
+    deleted_by: Optional[str] = Query(None, description="Who is deleting the strip"),
     use_case: FlightStripUseCase = Depends(get_flight_strip_use_case),
 ) -> FlightStripDeletedResponse:
-    """Delete flight strip"""
+    """Soft delete flight strip (can be restored later)"""
 
-    success = await use_case.delete_flight_strip(flight_strip_name)
+    success = await use_case.delete_flight_strip(flight_strip_name, deleted_by)
 
     return FlightStripDeletedResponse(deleted_name=flight_strip_name)
+
+
+@router.post(
+    "/{flight_strip_name}/restore",
+    response_model=FlightStripResponse,
+    summary="Restore Flight Strip",
+    description="Restore a soft-deleted flight strip",
+)
+async def restore_flight_strip(
+    flight_strip_name: str = Path(..., description="Flight strip name"),
+    use_case: FlightStripUseCase = Depends(get_flight_strip_use_case),
+) -> FlightStripResponse:
+    """Restore a soft-deleted flight strip"""
+
+    success = await use_case.restore_flight_strip(flight_strip_name)
+    
+    # Get the restored flight strip to return it
+    restored_strip = await use_case.get_flight_strip_by_flight_name(flight_strip_name)
+    
+    return FlightStripResponse.from_domain(restored_strip)
 
 
 @router.get(
@@ -95,14 +118,14 @@ async def get_flight_strip(
 
 
 @router.put(
-    "/{flight_strip_id}",
+    "/{flight_strip_name}",
     response_model=FlightStripUpdatedResponse,
     summary="Update Flight Strip",
     description="Update a flight strip by its database ID",
 )
 async def update_flight_strip(
     request: UpdateFlightStripRequest,
-    flight_strip_id: str = Path(..., description="Flight strip database ID"),
+    flight_strip_name: str = Path(..., description="Flight strip database ID"),
     use_case: FlightStripUseCase = Depends(get_flight_strip_use_case),
 ) -> FlightStripUpdatedResponse:
     """Update flight strip"""
@@ -113,7 +136,7 @@ async def update_flight_strip(
     }
 
     updated_strip = await use_case.update_flight_strip(
-        flight_strip_id, **update_fields
+        flight_strip_name, **update_fields
     )
 
     return FlightStripUpdatedResponse(
@@ -161,3 +184,38 @@ async def list_flight_strips(
         total_count=len(flight_strips),
         offset=offset,
     )
+
+
+@router.get(
+    "/deleted/list",
+    response_model=FlightStripListResponse,
+    summary="List Deleted Flight Strips",
+    description="Get all soft-deleted flight strips",
+)
+async def list_deleted_flight_strips(
+    use_case: FlightStripUseCase = Depends(get_flight_strip_use_case),
+) -> FlightStripListResponse:
+    """List all soft-deleted flight strips"""
+
+    deleted_strips = await use_case.list_deleted_flight_strips()
+
+    return FlightStripListResponse(
+        flight_strips=[
+            FlightStripResponse.from_domain(fs) for fs in deleted_strips
+        ],
+        total_count=len(deleted_strips),
+        offset=0,
+    )
+
+
+@router.get(
+    "/statistics/deletion",
+    summary="Get Deletion Statistics",
+    description="Get statistics about active and deleted flight strips",
+)
+async def get_deletion_statistics(
+    use_case: FlightStripUseCase = Depends(get_flight_strip_use_case),
+) -> dict:
+    """Get deletion statistics"""
+
+    return await use_case.get_deletion_statistics()

@@ -23,6 +23,13 @@ class EventStream(str, Enum):
     MANAGER_FLIGHT_STRIPS_DELETE = "MANAGER_FLIGHT_STRIPS_DELETE"
     MANAGER_FLIGHT_STRIPS_LIST = "MANAGER_FLIGHT_STRIPS_LIST"
 
+    # Drone Mapping events
+    MANAGER_DRONE_MAPPINGS_CREATE = "MANAGER_DRONE_MAPPINGS_CREATE"
+    MANAGER_DRONE_MAPPINGS_BULK_CREATE = "MANAGER_DRONE_MAPPINGS_BULK_CREATE"
+    MANAGER_DRONE_MAPPINGS_LIST = "MANAGER_DRONE_MAPPINGS_LIST"
+    MANAGER_DRONE_MAPPINGS_UPDATE = "MANAGER_DRONE_MAPPINGS_UPDATE"
+    MANAGER_DRONE_MAPPINGS_DELETE = "MANAGER_DRONE_MAPPINGS_DELETE"
+
     # Health events
     MANAGER_HEALTH_CHECK = "MANAGER_HEALTH_CHECK"
 
@@ -35,6 +42,10 @@ ROUTE_EVENT_MAPPINGS: Dict[Tuple[str, str], str] = {
     # Flight Strip routes
     ("POST", "/api/flight-strips/"): EventStream.MANAGER_FLIGHT_STRIPS_CREATE,
     ("GET", "/api/flight-strips/"): EventStream.MANAGER_FLIGHT_STRIPS_LIST,
+    # Drone Mapping routes
+    ("POST", "/api/drone-mappings/"): EventStream.MANAGER_DRONE_MAPPINGS_CREATE,
+    ("POST", "/api/drone-mappings/bulk"): EventStream.MANAGER_DRONE_MAPPINGS_BULK_CREATE,
+    ("GET", "/api/drone-mappings/"): EventStream.MANAGER_DRONE_MAPPINGS_LIST,
     (
         "DELETE",
         "/api/flight-strips/{flight_strip_name}",

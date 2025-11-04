@@ -15,44 +15,66 @@ import { FLIGHT_AREAS } from "@/shared/model";
 import { useStrips } from "@/shared/lib/strips";
 import { formatFlightArea } from "@/shared/model";
 import { FlightStripsService } from "@/shared/api";
+import { useLanguage } from "@/shared/lib/lang";
 
 interface AddFlightStripFormProps {
-  onAdd: (strip: FlightStripUI) => void;
+  onAdd: (strip: FlightStripUI) => Promise<void>;
+  editStrip?: FlightStripUI;
+  onEdit?: (strip: FlightStripUI) => Promise<void>;
 }
 
-const AddFlightStripForm = ({ onAdd }: AddFlightStripFormProps) => {
+const AddFlightStripForm = ({
+  onAdd,
+  editStrip,
+  onEdit,
+}: AddFlightStripFormProps) => {
   const { activeStripIds } = useStrips();
+  const { t } = useLanguage();
+
+  const [id, setId] = useState(editStrip?.name || "");
+  const [flightArea, setFlightArea] = useState<FlightArea>(
+    editStrip?.flightArea || activeStripIds[0] || "red",
+  );
+  const [height, setHeight] = useState(editStrip?.height?.toString() || "");
+  const [takeoffSpace, setTakeoffSpace] = useState(
+    editStrip?.takeoffSpace || "",
+  );
+  const [landingSpace, setLandingSpace] = useState(
+    editStrip?.landingSpace || "",
+  );
+  const [description, setDescription] = useState(editStrip?.description || "");
+  const [takeoffTime, setTakeoffTime] = useState<Dayjs | null>(
+    editStrip?.takeoffTime ? dayjs(editStrip.takeoffTime, "HH:mm") : null,
+  );
+  const [landingTime, setLandingTime] = useState<Dayjs | null>(
+    editStrip?.landingTime ? dayjs(editStrip.landingTime, "HH:mm") : null,
+  );
 
   const [loading, setLoading] = useState(false);
-  const [id, setId] = useState("");
-  const [flightArea, setFlightArea] = useState<FlightArea>(
-    activeStripIds[0] || "red",
-  );
-  const [height, setHeight] = useState("");
-  const [takeoffSpace, setTakeoffSpace] = useState("");
-  const [landingSpace, setLandingSpace] = useState("");
-  const [takeoffTime, setTakeoffTime] = useState<Dayjs | null>(null);
-  const [landingTime, setLandingTime] = useState<Dayjs | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!takeoffTime || !landingTime) return;
-
-    const newStrip: FlightStripUI = {
+    const strip: FlightStripUI = {
       name: id,
       flightArea,
-      height: Number(height),
-      takeoffSpace,
-      landingSpace,
-      takeoffTime: takeoffTime.format("HH:mm"),
-      landingTime: landingTime.format("HH:mm"),
+      ...(height && { height: Number(height) }),
+      ...(takeoffSpace && { takeoffSpace }),
+      ...(landingSpace && { landingSpace }),
+      ...(takeoffTime && { takeoffTime: takeoffTime.format("HH:mm") }),
+      ...(landingTime && { landingTime: landingTime.format("HH:mm") }),
+      ...(description && { description }),
+      active: editStrip?.active ?? false,
     };
 
     try {
       setLoading(true);
-      await FlightStripsService.create(newStrip);
-      onAdd(newStrip);
+
+      if (editStrip && onEdit) {
+        await onEdit(strip);
+      } else {
+        await onAdd(strip);
+      }
 
       // Reset form
       setId("");
@@ -60,6 +82,7 @@ const AddFlightStripForm = ({ onAdd }: AddFlightStripFormProps) => {
       setHeight("");
       setTakeoffSpace("");
       setLandingSpace("");
+      setDescription("");
       setTakeoffTime(null);
       setLandingTime(null);
     } catch (error) {
@@ -76,19 +99,20 @@ const AddFlightStripForm = ({ onAdd }: AddFlightStripFormProps) => {
       sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}
     >
       <TextField
-        label="ID"
+        label={t("common.id")}
         size="small"
         fullWidth
         value={id}
         onChange={(e) => setId(e.target.value)}
         required
+        disabled={!!editStrip}
       />
 
       <FormControl size="small" fullWidth required>
-        <InputLabel>Flight Area</InputLabel>
+        <InputLabel>{t("common.flightArea")}</InputLabel>
         <Select
           value={flightArea}
-          label="Flight Area"
+          label={t("common.flightArea")}
           onChange={(e) => setFlightArea(e.target.value as FlightArea)}
         >
           {FLIGHT_AREAS.map((area) => (
@@ -100,61 +124,69 @@ const AddFlightStripForm = ({ onAdd }: AddFlightStripFormProps) => {
       </FormControl>
 
       <TextField
-        label="Height (m)"
+        label={t("addStrip.height")}
         size="small"
         type="number"
         fullWidth
         value={height}
         onChange={(e) => setHeight(e.target.value)}
-        required
       />
 
       <TextField
-        label="Takeoff Space"
+        label={t("addStrip.takeoffSpace")}
         size="small"
         fullWidth
         value={takeoffSpace}
         onChange={(e) => setTakeoffSpace(e.target.value)}
-        required
       />
 
       <TextField
-        label="Landing Space"
+        label={t("addStrip.landingSpace")}
         size="small"
         fullWidth
         value={landingSpace}
         onChange={(e) => setLandingSpace(e.target.value)}
-        required
+      />
+
+      <TextField
+        label={t("addStrip.description")}
+        size="small"
+        fullWidth
+        multiline
+        rows={2}
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        placeholder={t("addStrip.descriptionPlaceholder")}
       />
 
       <TimePicker
-        label="Takeoff Time"
+        label={t("addStrip.takeoffTime")}
         value={takeoffTime}
         onChange={(newValue) => setTakeoffTime(newValue)}
+        ampm={false}
         slotProps={{
           textField: {
             size: "small",
             fullWidth: true,
-            required: true,
           },
         }}
       />
 
       <TimePicker
-        label="Landing Time"
+        label={t("addStrip.landingTime")}
         value={landingTime}
         onChange={(newValue) => setLandingTime(newValue)}
+        ampm={false}
         slotProps={{
           textField: {
             size: "small",
             fullWidth: true,
-            required: true,
           },
         }}
       />
 
       <Button type="submit" variant="contained" fullWidth>
-        Add Strip
+        {editStrip ? t("addStrip.saveChanges") : t("addStrip.addFlightStrip")}
       </Button>
     </Box>
   );

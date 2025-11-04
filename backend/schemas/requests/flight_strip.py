@@ -20,11 +20,13 @@ class CreateFlightStripRequest(BaseModel):
     
     name: str = Field(..., min_length=1, max_length=20, description="Flight strip name")
     flight_area: FlightArea = Field(..., description="Flight area color zone")
-    height: int = Field(..., gt=0, description="Flight height in meters")
-    takeoff_space: str = Field(..., min_length=1, max_length=10, description="Takeoff space identifier")
-    landing_space: str = Field(..., min_length=1, max_length=10, description="Landing space identifier")
-    takeoff_time: str = Field(..., pattern=r"^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$", description="Takeoff time in HH:MM format")
-    landing_time: str = Field(..., pattern=r"^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$", description="Landing time in HH:MM format")
+    height: Optional[int] = Field(None, gt=0, description="Flight height in meters")
+    takeoff_space: Optional[str] = Field(None, min_length=1, max_length=10, description="Takeoff space identifier")
+    landing_space: Optional[str] = Field(None, min_length=1, max_length=10, description="Landing space identifier")
+    takeoff_time: Optional[str] = Field(None, pattern=r"^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$", description="Takeoff time in HH:MM format")
+    landing_time: Optional[str] = Field(None, pattern=r"^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$", description="Landing time in HH:MM format")
+    description: Optional[str] = Field(None, max_length=500, description="Flight strip description")
+    active: bool = Field(default=True, description="Whether the flight strip is active")
 
 
 class UpdateFlightStripRequest(BaseModel):
@@ -36,6 +38,8 @@ class UpdateFlightStripRequest(BaseModel):
     landing_space: Optional[str] = Field(None, min_length=1, max_length=10, description="Landing space identifier")
     takeoff_time: Optional[str] = Field(None, pattern=r"^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$", description="Takeoff time in HH:MM format")
     landing_time: Optional[str] = Field(None, pattern=r"^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$", description="Landing time in HH:MM format")
+    description: Optional[str] = Field(None, max_length=500, description="Flight strip description")
+    active: Optional[bool] = Field(None, description="Whether the flight strip is active")
 
 
 class SearchFlightStripsRequest(BaseModel):
