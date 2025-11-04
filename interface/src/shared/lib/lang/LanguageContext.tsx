@@ -88,6 +88,8 @@ const translations: Record<Language, Record<string, string>> = {
     "droneMapping.noValidData": "No valid data found in CSV file",
     "droneMapping.csvParseError": "Failed to parse CSV file",
     "droneMapping.addAtLeastOne": "Please add at least one drone mapping",
+    "droneMapping.loadError": "Failed to load drone mappings",
+    "droneMapping.saveError": "Failed to save drone mappings",
 
     // Login
     "login.title": "BR-UTM Manager",
@@ -247,6 +249,8 @@ const translations: Record<Language, Record<string, string>> = {
     "droneMapping.noValidData": "Nenhum dado válido encontrado no arquivo CSV",
     "droneMapping.csvParseError": "Falha ao analisar arquivo CSV",
     "droneMapping.addAtLeastOne": "Por favor, adicione pelo menos um mapeamento de drone",
+    "droneMapping.loadError": "Falha ao carregar mapeamentos de drones",
+    "droneMapping.saveError": "Falha ao salvar mapeamentos de drones",
 
     // Login
     "login.title": "BR-UTM Manager",

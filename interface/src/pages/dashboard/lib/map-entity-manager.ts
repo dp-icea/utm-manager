@@ -18,7 +18,8 @@ import {
   isIdentificationServiceArea,
   isOperationalIntent,
 } from "@/shared/lib";
-import type { DroneMapping } from "@/pages/drone-mapping";
+import { DroneMappingsService } from "@/shared/api/drone-mappings";
+import { type DroneMappingUI } from "@/shared/model";
 
 const DEFAULT_POLYGON_ALPHA = 0.3;
 const SELECTED_POLYGON_ALPHA = 0.5;
@@ -64,7 +65,7 @@ export class MapEntityManager {
   private geoJsonData: GeoJsonFormat | null = null;
   private geoJsonEntities: Cesium.Entity[] = [];
   private selectedGeoJsonEntities: Set<Cesium.Entity> = new Set();
-  private droneMappings: Array<DroneMapping> = [];
+  private droneMappings: Array<DroneMappingUI> = [];
   private strips: FlightStripUI[] = [];
 
   private onSelectedGeoJsonEntitiesChange: () => void = () => { };
@@ -89,7 +90,7 @@ export class MapEntityManager {
 
     this.handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
 
-    this.droneMappings = this.loadDroneMappings();
+    this.loadDroneMappings();
 
     this.loadGeoJsonZones();
 
@@ -136,17 +137,13 @@ export class MapEntityManager {
     this.viewer.scene.mode = mode;
   }
 
-  private loadDroneMappings(): Array<DroneMapping> {
-    const saved = localStorage.getItem("droneMappings");
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error("Failed to load drone mappings:", e);
-        return [];
-      }
-    } else {
-      return [];
+  private async loadDroneMappings(): Promise<void> {
+    try {
+      this.droneMappings = await DroneMappingsService.listAll();
+      console.log("Loaded drone mappings from API:", this.droneMappings);
+    } catch (error) {
+      console.error("Failed to load drone mappings from API:", error);
+      this.droneMappings = [];
     }
   }
 
@@ -195,6 +192,10 @@ export class MapEntityManager {
       (mapping) => mapping.serialNumber === id || mapping.sisant === id,
     );
     return mapping?.id || null;
+  }
+
+  public async refreshDroneMappings(): Promise<void> {
+    await this.loadDroneMappings();
   }
 
   private maybeGetDroneStrip(id: string | null): FlightStripUI | null {

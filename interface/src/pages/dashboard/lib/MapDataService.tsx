@@ -306,6 +306,9 @@ export const MapDataService = () => {
       }, FLIGHT_FETCH_INTERVAL);
     }
 
+    // Refresh drone mappings when map is initialized
+    controller.current.refreshDroneMappings();
+
     controller.current.addSelectedEntitiesChangeCallback(
       (entities: Set<Cesium.Entity>) => {
         setActiveStripIds(
@@ -424,6 +427,15 @@ export const MapDataService = () => {
   useEffect(onLiveToggle, [isLive]);
 
   useEffect(() => {
+    // Add window focus listener to refresh drone mappings when returning to dashboard
+    const handleWindowFocus = () => {
+      if (controller.current) {
+        controller.current.refreshDroneMappings();
+      }
+    };
+
+    window.addEventListener('focus', handleWindowFocus);
+
     return () => {
       if (constantVolumeFetch.current) {
         clearInterval(constantVolumeFetch.current);
@@ -432,6 +444,7 @@ export const MapDataService = () => {
         clearInterval(liveInterval.current);
       }
       controller.current = null;
+      window.removeEventListener('focus', handleWindowFocus);
     };
   }, []);
 

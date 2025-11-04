@@ -23,32 +23,43 @@ import UploadFileIcon from "@mui/icons-material/UploadFile";
 import { toast } from "sonner";
 import { ROUTES } from "@/shared/config";
 import { useLanguage } from "@/shared/lib/lang";
+import { DroneMappingsService } from "@/shared/api/drone-mappings";
+import { type DroneMappingUI } from "@/shared/model";
 
-export interface DroneMapping {
-  id: string;
-  serialNumber: string;
-  sisant: string;
-}
+// Use DroneMappingUI from shared model
+type DroneMapping = DroneMappingUI;
 
 export const DroneMappingPage = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [mappings, setMappings] = useState<DroneMapping[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Load from localStorage on mount
-    const saved = localStorage.getItem("droneMappings");
-    if (saved) {
+    // Load from backend API on mount
+    const loadMappings = async () => {
       try {
-        setMappings(JSON.parse(saved));
-      } catch (e) {
-        console.error("Failed to load drone mappings:", e);
+        setLoading(true);
+        const backendMappings = await DroneMappingsService.listAll();
+
+        if (backendMappings.length > 0) {
+          setMappings(backendMappings);
+        } else {
+          // Start with one empty row if no mappings exist
+          setMappings([{ id: "", serialNumber: "", sisant: "" }]);
+        }
+      } catch (error) {
+        console.error("Failed to load drone mappings:", error);
+        toast.error(t("droneMapping.loadError"));
+        // Start with one empty row on error
+        setMappings([{ id: "", serialNumber: "", sisant: "" }]);
+      } finally {
+        setLoading(false);
       }
-    } else {
-      // Start with one empty row
-      setMappings([{ id: "", serialNumber: "", sisant: "" }]);
-    }
-  }, []);
+    };
+
+    loadMappings();
+  }, [t]);
 
   const handleAddRow = () => {
     setMappings([...mappings, { id: "", serialNumber: "", sisant: "" }]);
@@ -97,7 +108,9 @@ export const DroneMappingPage = () => {
 
         if (newMappings.length > 0) {
           setMappings(newMappings);
-          toast.success(t("droneMapping.loadedFromCSV", { count: newMappings.length }));
+          toast.success(
+            t("droneMapping.loadedFromCSV", { count: newMappings.length }),
+          );
         } else {
           toast.error(t("droneMapping.noValidData"));
         }
@@ -112,10 +125,10 @@ export const DroneMappingPage = () => {
     event.target.value = "";
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     // Validate that at least one row has data
     const validMappings = mappings.filter(
-      (m) => m.id || m.serialNumber || m.sisant,
+      (m) => m.id && (m.serialNumber || m.sisant),
     );
 
     if (validMappings.length === 0) {
@@ -123,10 +136,25 @@ export const DroneMappingPage = () => {
       return;
     }
 
-    // Save to localStorage
-    localStorage.setItem("droneMappings", JSON.stringify(mappings));
-    toast.success(t("droneMapping.saved"));
-    navigate(ROUTES.DASHBOARD);
+    try {
+      setLoading(true);
+
+      // Use the service to bulk create mappings
+      await DroneMappingsService.bulkCreate(
+        validMappings,
+        "user", // You can get this from auth context if available
+      );
+
+      toast.success(t("droneMapping.saved"));
+      navigate(ROUTES.DASHBOARD);
+    } catch (error: any) {
+      console.error("Failed to save drone mappings:", error);
+      const errorMessage =
+        error.response?.data?.detail || error.message || "Unknown error";
+      toast.error(t("droneMapping.saveError") + ": " + errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCancel = () => {

@@ -73,6 +73,12 @@ class MongoDBClient:
             raise RuntimeError("Client not connected. Call connect() first.")
         return self._client
 
+    def get_collection(self, collection_name: str):
+        """Get a collection from the database"""
+        if self._database is None:
+            raise RuntimeError("Database not connected. Call connect() first.")
+        return self._database[collection_name]
+
     async def create_indexes(self) -> None:
         """Create database indexes for optimal performance"""
         try:
@@ -103,6 +109,22 @@ class MongoDBClient:
             await flight_strips.create_index(
                 [("flight_area", 1), ("takeoff_time", 1)]
             )
+
+            # Indexes for drone_mappings collection
+            drone_mappings = self._database.drone_mappings
+
+            # Unique indexes for identifiers
+            await drone_mappings.create_index("id")
+            await drone_mappings.create_index("serial_number")
+            await drone_mappings.create_index("sisant")
+
+            # Indexes for queries
+            await drone_mappings.create_index("created_at")
+            await drone_mappings.create_index("deleted_at")
+            await drone_mappings.create_index("created_by")
+
+            # Compound index for soft delete queries
+            await drone_mappings.create_index([("deleted_at", 1), ("id", 1)])
 
             logging.info("MongoDB indexes created successfully")
 

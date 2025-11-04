@@ -8,6 +8,7 @@ from routes.airspace import router as AirspaceRouter
 from routes.constraints import router as ConstraintsRouter
 from routes.health import router as HealthRouter
 from routes.flight_strips import router as FlightStripsRouter
+from routes.drone_mappings import router as DroneMappingsRouter
 from infrastructure.mongodb_client import mongodb_client
 from infrastructure.event_service import EventService
 from infrastructure.correlation import setup_correlation_logging, CorrelationIdManager
@@ -164,3 +165,4 @@ app.include_router(AirspaceRouter, tags=["Airspace"])
 app.include_router(ConstraintsRouter, tags=["Constraints"])
 app.include_router(HealthRouter, tags=["Health"])
 app.include_router(FlightStripsRouter, tags=["Flight Strips"])
+app.include_router(DroneMappingsRouter, tags=["Drone Mappings"])
