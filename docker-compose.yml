@@ -1,33 +1,25 @@
 services:
-  api:
-    image: "${RUNNER_ADDRESS}/dev/uss-api:latest"
-    ports:
-      - "8000:8000"
+  manager:
+    image: ghcr.io/dp-icea/utm-manager:dev
     environment:
-      ENV: "prod"
-      AUTH_KEY: "${AUTH_KEY}"
+      BRUTM_KEY: "<BR-UTM Key>"
+      BRUTM_BASE_URL: "http://api.dev.br-utm.org"
+      MONGODB_URL: "mongodb://mongo:27017"
+      MONGODB_DATABASE: "utm_manager"
     logging:
       driver: fluentd
       options:
-        tag: flight-strips-manager-api
+        tag: utm-manager-backend
     deploy:
       replicas: 1
       restart_policy:
         condition: on-failure
+    networks:
+      - nginx_public
+      - manager-db
 
-  interface:
-    image: "${RUNNER_ADDRESS}/dev/uss-viewer:latest"
-    ports:
-      - "80:80"
-    depends_on:
-      - api
-    environment:
-      ENV: "prod"
-      ION_KEY: "${ION_KEY}"
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
-
-  volumes:
-    data:
+networks:
+  nginx_public:
+    external: true
+  manager-db:
+    external: true
