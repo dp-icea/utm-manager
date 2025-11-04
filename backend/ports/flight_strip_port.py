@@ -39,7 +39,27 @@ class FlightStripRepositoryPort(ABC):
 
     @abstractmethod
     async def delete(self, flight_strip_name: str) -> bool:
-        """Delete flight strip by database ID"""
+        """Hard delete flight strip by name (permanent removal)"""
+        pass
+
+    @abstractmethod
+    async def soft_delete(self, flight_strip_name: str, deleted_by: Optional[str] = None) -> bool:
+        """Soft delete flight strip by name"""
+        pass
+
+    @abstractmethod
+    async def restore(self, flight_strip_name: str) -> bool:
+        """Restore a soft-deleted flight strip"""
+        pass
+
+    @abstractmethod
+    async def list_deleted(self) -> List[FlightStrip]:
+        """Get all soft-deleted flight strips"""
+        pass
+
+    @abstractmethod
+    async def count_deleted(self) -> int:
+        """Get count of soft-deleted flight strips"""
         pass
 
     @abstractmethod

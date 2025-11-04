@@ -32,6 +32,11 @@ class FlightStrip(BaseModel):
     description: Optional[str] = Field(None, description="Flight strip description")
     active: bool = Field(default=True, description="Whether the flight strip is active")
     
+    # Soft delete fields
+    is_deleted: bool = Field(default=False, description="Whether the flight strip is soft-deleted")
+    deleted_at: Optional[datetime] = Field(None, description="When the flight strip was deleted")
+    deleted_by: Optional[str] = Field(None, description="Who deleted the flight strip")
+    
     # Timestamps for tracking
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
@@ -46,4 +51,18 @@ class FlightStrip(BaseModel):
         for field, value in kwargs.items():
             if hasattr(self, field) and value is not None:
                 setattr(self, field, value)
+        self.updated_at = datetime.utcnow()
+    
+    def soft_delete(self, deleted_by: Optional[str] = None) -> None:
+        """Mark the flight strip as soft-deleted"""
+        self.is_deleted = True
+        self.deleted_at = datetime.utcnow()
+        self.deleted_by = deleted_by
+        self.updated_at = datetime.utcnow()
+    
+    def restore(self) -> None:
+        """Restore a soft-deleted flight strip"""
+        self.is_deleted = False
+        self.deleted_at = None
+        self.deleted_by = None
         self.updated_at = datetime.utcnow()

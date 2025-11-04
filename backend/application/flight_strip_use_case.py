@@ -155,8 +155,8 @@ class FlightStripUseCase:
                 details=str(e),
             )
 
-    async def delete_flight_strip(self, flight_strip_name: str) -> bool:
-        """Delete flight strip"""
+    async def delete_flight_strip(self, flight_strip_name: str, deleted_by: Optional[str] = None) -> bool:
+        """Delete flight strip (soft delete - can be restored later)"""
         try:
             # Check if flight strip exists
             existing = await self.repository.get_by_flight_name(
@@ -166,16 +166,16 @@ class FlightStripUseCase:
                 raise ApiException(
                     status_code=HTTPStatus.NOT_FOUND,
                     message=(
-                        f"Flight strip with ID '{flight_strip_name}' not found"
+                        f"Flight strip with name '{flight_strip_name}' not found"
                     ),
                 )
 
-            success = await self.repository.delete(flight_strip_name)
+            success = await self.repository.soft_delete(flight_strip_name, deleted_by)
 
             if success:
                 logging.info(
                     f"Deleted flight strip: {existing.name} from"
-                    f" {existing.flight_area} area"
+                    f" {existing.flight_area} area by {deleted_by or 'unknown'}"
                 )
 
             return success
@@ -189,6 +189,101 @@ class FlightStripUseCase:
             raise ApiException(
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
                 message="Failed to delete flight strip",
+                details=str(e),
+            )
+
+    async def hard_delete_flight_strip(self, flight_strip_name: str) -> bool:
+        """Hard delete flight strip (permanent removal - admin only)"""
+        try:
+            # Check if flight strip exists (including soft-deleted ones)
+            collection = self.repository.collection
+            existing = await collection.find_one({"name": flight_strip_name})
+            
+            if not existing:
+                raise ApiException(
+                    status_code=HTTPStatus.NOT_FOUND,
+                    message=(
+                        f"Flight strip with name '{flight_strip_name}' not found"
+                    ),
+                )
+
+            success = await self.repository.delete(flight_strip_name)
+
+            if success:
+                logging.info(
+                    f"Permanently deleted flight strip: {flight_strip_name}"
+                )
+
+            return success
+
+        except ApiException:
+            raise
+        except Exception as e:
+            logging.error(
+                f"Error permanently deleting flight strip {flight_strip_name}: {e}"
+            )
+            raise ApiException(
+                status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                message="Failed to permanently delete flight strip",
+                details=str(e),
+            )
+
+    async def restore_flight_strip(self, flight_strip_name: str) -> bool:
+        """Restore a soft-deleted flight strip"""
+        try:
+            success = await self.repository.restore(flight_strip_name)
+
+            if not success:
+                raise ApiException(
+                    status_code=HTTPStatus.NOT_FOUND,
+                    message=(
+                        f"Deleted flight strip with name '{flight_strip_name}' not found"
+                    ),
+                )
+
+            logging.info(f"Restored flight strip: {flight_strip_name}")
+            return success
+
+        except ApiException:
+            raise
+        except Exception as e:
+            logging.error(
+                f"Error restoring flight strip {flight_strip_name}: {e}"
+            )
+            raise ApiException(
+                status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                message="Failed to restore flight strip",
+                details=str(e),
+            )
+
+    async def list_deleted_flight_strips(self) -> List[FlightStrip]:
+        """Get all soft-deleted flight strips"""
+        try:
+            return await self.repository.list_deleted()
+        except Exception as e:
+            logging.error(f"Error listing deleted flight strips: {e}")
+            raise ApiException(
+                status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                message="Failed to retrieve deleted flight strips",
+                details=str(e),
+            )
+
+    async def get_deletion_statistics(self) -> dict:
+        """Get statistics about deleted flight strips"""
+        try:
+            deleted_count = await self.repository.count_deleted()
+            active_count = len(await self.repository.list_all())
+            
+            return {
+                "active_strips": active_count,
+                "deleted_strips": deleted_count,
+                "total_strips": active_count + deleted_count
+            }
+        except Exception as e:
+            logging.error(f"Error getting deletion statistics: {e}")
+            raise ApiException(
+                status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                message="Failed to retrieve deletion statistics",
                 details=str(e),
             )
 

@@ -80,7 +80,7 @@ class MongoDBClient:
             flight_strips = self._database.flight_strips
 
             # Create indexes for common queries
-            await flight_strips.create_index("call_sign", unique=True)
+            await flight_strips.create_index("call_sign")
             await flight_strips.create_index("status")
             await flight_strips.create_index("assigned_controller")
             await flight_strips.create_index("sector")
@@ -96,10 +96,9 @@ class MongoDBClient:
             await flight_strips.create_index([("sector", 1), ("status", 1)])
 
             # Additional indexes for the simplified model fields
-            await flight_strips.create_index("name", unique=True)
             await flight_strips.create_index("flight_area")
             await flight_strips.create_index("takeoff_time")
-            
+
             # Additional compound index for simplified model queries
             await flight_strips.create_index(
                 [("flight_area", 1), ("takeoff_time", 1)]
@@ -114,4 +113,3 @@ class MongoDBClient:
 
 # Global instance
 mongodb_client = MongoDBClient()
-
