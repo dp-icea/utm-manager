@@ -2,6 +2,7 @@
 from http import HTTPStatus
 from typing import List
 from datetime import datetime
+from config.config import Settings
 import logging
 
 from domain.airspace import AirspaceAllocations, AirspaceFlights
@@ -86,10 +87,12 @@ class AirspaceQueryUseCase:
                 },
             )
 
+        if Settings().ENV == "dev":
+            flights = flights + generate_flight_mock_data()
+
         return AirspaceFlights(
             timestamp=datetime.now(),
-            flights=flights + generate_flight_mock_data(),
-            # flights=generate_flight_mock_data(),
+            flights=flights,
         )
 
     async def _get_constraint_details(self, references) -> List[Constraint]:
