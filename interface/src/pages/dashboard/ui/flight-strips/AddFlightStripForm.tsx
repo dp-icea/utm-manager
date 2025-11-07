@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -7,6 +7,7 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  Autocomplete,
 } from "@mui/material";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import type { FlightArea, FlightStripUI } from "@/shared/model";
@@ -16,6 +17,7 @@ import { useStrips } from "@/shared/lib/strips";
 import { formatFlightArea } from "@/shared/model";
 import { FlightStripsService } from "@/shared/api";
 import { useLanguage } from "@/shared/lib/lang";
+import { DroneMappingsService } from "@/shared/api/drone-mappings";
 
 interface AddFlightStripFormProps {
   onAdd: (strip: FlightStripUI) => Promise<void>;
@@ -32,6 +34,7 @@ const AddFlightStripForm = ({
   const { t } = useLanguage();
 
   const [id, setId] = useState(editStrip?.name || "");
+  const [droneIds, setDroneIds] = useState<string[]>([]);
   const [flightArea, setFlightArea] = useState<FlightArea>(
     editStrip?.flightArea || activeStripIds[0] || "red",
   );
@@ -51,6 +54,21 @@ const AddFlightStripForm = ({
   );
 
   const [loading, setLoading] = useState(false);
+
+  // Load drone IDs from DroneMappingsService
+  useEffect(() => {
+    const loadDroneIds = async () => {
+      try {
+        const mappings = await DroneMappingsService.listAll();
+        const ids = mappings.map((mapping) => mapping.id);
+        setDroneIds(ids);
+      } catch (error) {
+        console.error("Failed to load drone IDs:", error);
+      }
+    };
+
+    loadDroneIds();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,14 +116,21 @@ const AddFlightStripForm = ({
       onSubmit={handleSubmit}
       sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}
     >
-      <TextField
-        label={t("common.id")}
-        size="small"
-        fullWidth
+      <Autocomplete
+        freeSolo
+        options={droneIds}
         value={id}
-        onChange={(e) => setId(e.target.value)}
-        required
+        onChange={(_, newValue) => setId(newValue || "")}
+        onInputChange={(_, newInputValue) => setId(newInputValue)}
         disabled={!!editStrip}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label={t("common.id")}
+            size="small"
+            required
+          />
+        )}
       />
 
       <FormControl size="small" fullWidth required>
