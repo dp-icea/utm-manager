@@ -11,7 +11,10 @@ from routes.flight_strips import router as FlightStripsRouter
 from routes.drone_mappings import router as DroneMappingsRouter
 from infrastructure.mongodb_client import mongodb_client
 from infrastructure.event_service import EventService
-from infrastructure.correlation import setup_correlation_logging, CorrelationIdManager
+from infrastructure.correlation import (
+    setup_correlation_logging,
+    CorrelationIdManager,
+)
 from middleware.correlation import CorrelationIdMiddleware
 from config.config import Settings
 from config.event_mappings import get_event_stream_for_request
@@ -74,7 +77,9 @@ logging.basicConfig(
     level=logging.DEBUG,
 )
 
-# Setup correlation ID logging
+logging.getLogger("pymongo").setLevel(logging.INFO)
+logging.getLogger("motor").setLevel(logging.INFO)
+
 setup_correlation_logging()
 
 
@@ -120,7 +125,7 @@ async def catch_exceptions_middleware(request: Request, call_next):
     try:
         # Get correlation ID for logging (will be available from correlation middleware)
         correlation_id = CorrelationIdManager.get_correlation_id()
-        
+
         logging.info(
             f"[API REQUEST] {request.method} {request.url.path} - "
             f"Headers: {request.headers}, "

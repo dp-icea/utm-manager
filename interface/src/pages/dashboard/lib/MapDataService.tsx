@@ -121,6 +121,40 @@ export const MapDataService = () => {
     }
   };
 
+  const fetchFlightsFromMultipleRectangles = async (
+    rectangles: Rectangle[],
+  ) => {
+    try {
+      const allFlights: Flight[] = [];
+      for (const rectangle of rectangles) {
+        const area: Rectangle = {
+          north: rectangle.north,
+          south: rectangle.south,
+          east: rectangle.east,
+          west: rectangle.west,
+        };
+        const res = await FlightsService.query(area);
+        allFlights.push(...res.flights);
+      }
+      setFlights(allFlights);
+      setMapState(MapState.ONLINE);
+    } catch (e) {
+      if (e.code === "ERR_NETWORK") {
+        setMapState(MapState.OFFLINE);
+        toast({
+          title: "Network Error",
+          description: "Unable to fetch flights. Please check your connection.",
+        });
+      } else {
+        setMapState(MapState.ERROR);
+        toast({
+          title: "Error",
+          description: "An error occurred while fetching flights.",
+        });
+      }
+    }
+  };
+
   const fetchVolumes = async (rectangle: Rectangle) => {
     if (!controller.current) return;
 
@@ -271,11 +305,18 @@ export const MapDataService = () => {
     if (!controller.current) return;
 
     setLoading(true);
-    // const viewRectangle = controller.current.getViewRectangle();
-    const viewRectangle = controller.current.getFixedViewInterlagosRectangle();
-    if (viewRectangle) {
-      await fetchFlights(viewRectangle);
+
+    let rectangles: Rectangle[] = [];
+
+    rectangles.push(controller.current.getFirstQuarterViewRectangle());
+    rectangles.push(controller.current.getSecondQuarterViewRectangle());
+    rectangles.push(controller.current.getThirdQuarterViewRectangle());
+    rectangles.push(controller.current.getFourthQuarterViewRectangle());
+
+    if (rectangles) {
+      await fetchFlightsFromMultipleRectangles(rectangles);
     }
+
     setLoading(false);
   };
 
@@ -434,7 +475,7 @@ export const MapDataService = () => {
       }
     };
 
-    window.addEventListener('focus', handleWindowFocus);
+    window.addEventListener("focus", handleWindowFocus);
 
     return () => {
       if (constantVolumeFetch.current) {
@@ -444,7 +485,7 @@ export const MapDataService = () => {
         clearInterval(liveInterval.current);
       }
       controller.current = null;
-      window.removeEventListener('focus', handleWindowFocus);
+      window.removeEventListener("focus", handleWindowFocus);
     };
   }, []);
 
