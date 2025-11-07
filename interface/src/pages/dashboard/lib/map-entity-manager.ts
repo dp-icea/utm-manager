@@ -656,6 +656,52 @@ export class MapEntityManager {
     return ret;
   };
 
+  getFirstQuarterViewRectangle = (): Rectangle => {
+    const ret: Rectangle = {
+      north: -23.720044622651,
+      east: -46.71157502788901,
+      south: -23.699090950265614,
+      west: -46.696095304503416,
+    };
+
+    return ret;
+  };
+
+  getSecondQuarterViewRectangle = (): Rectangle => {
+    const ret: Rectangle = {
+      north: -23.720044622651,
+      east: -46.696095304503416,
+      south: -23.699090950265614,
+      west: -46.680615581111782,
+    };
+
+    return ret;
+  };
+
+  // Bottom-left quadrant
+  getThirdQuarterViewRectangle = (): Rectangle => {
+    const ret: Rectangle = {
+      north: -23.699090950265614,
+      east: -46.71157502788901,
+      south: -23.678137277880225,
+      west: -46.696095304503416,
+    };
+
+    return ret;
+  };
+
+  // Bottom-right quadrant
+  getFourthQuarterViewRectangle = (): Rectangle => {
+    const ret: Rectangle = {
+      north: -23.699090950265614,
+      east: -46.696095304503416,
+      south: -23.678137277880225,
+      west: -46.680615581111782,
+    };
+
+    return ret;
+  };
+
   private drawCylinder(
     volume: Volume3D,
     color: Cesium.Color = Cesium.Color.GREY,
