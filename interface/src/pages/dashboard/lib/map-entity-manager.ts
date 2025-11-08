@@ -347,6 +347,15 @@ export class MapEntityManager {
         }
       }
 
+      for (let mapping of this.droneMappings) {
+        if (mapping.serialNumber === droneId || mapping.sisant === droneId) {
+          if (ellipsoidColor === Cesium.Color.RED) {
+            ellipsoidColor = Cesium.Color.BLACK;
+            break;
+          }
+        }
+      }
+
       if (this.flights[id]) {
         const entity = this.flights[id][0];
         entity.position = Cesium.Cartesian3.fromDegrees(
