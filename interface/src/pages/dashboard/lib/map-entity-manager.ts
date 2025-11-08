@@ -347,6 +347,15 @@ export class MapEntityManager {
         }
       }
 
+      for (let mapping of this.droneMappings) {
+        if (mapping.serialNumber === droneId || mapping.sisant === droneId) {
+          if (ellipsoidColor === Cesium.Color.RED) {
+            ellipsoidColor = Cesium.Color.BLACK;
+            break;
+          }
+        }
+      }
+
       if (this.flights[id]) {
         const entity = this.flights[id][0];
         entity.position = Cesium.Cartesian3.fromDegrees(
@@ -392,7 +401,7 @@ export class MapEntityManager {
           ),
           // Replace point with sphere
           ellipsoid: {
-            radii: new Cesium.Cartesian3(10, 10, 10), // Adjust radius as needed
+            radii: new Cesium.Cartesian3(20, 20, 20), // Adjust radius as needed
             material: ellipsoidColor,
           },
         });

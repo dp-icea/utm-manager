@@ -49,15 +49,15 @@ const translations: Record<Language, Record<string, string>> = {
     // Dialogs
     "dialog.addStrip": "Add Flight Strip",
     "dialog.editStrip": "Edit Flight Strip",
-    "dialog.confirmDelete": "Confirm Deletion",
-    "dialog.deleteMessage": "Are you sure you want to delete flight strip",
-    "dialog.deleteWarning": "This action cannot be undone.",
+    "dialog.confirmDelete": "Confirm Archive",
+    "dialog.deleteMessage": "Are you sure you want to archive flight strip",
+    "dialog.deleteWarning": "This action can be undone by restoring the strip.",
     "dialog.cancel": "Cancel",
-    "dialog.delete": "Delete",
+    "dialog.delete": "Archive",
 
     // Snackbar messages
     "snackbar.stripAdded": "Flight strip added",
-    "snackbar.stripRemoved": "Strip {{id}} has been removed",
+    "snackbar.stripRemoved": "Strip {{id}} has been archived",
     "snackbar.stripUpdated": "Strip {{id}} updated successfully",
     "snackbar.stripActive": "Strip {{id}} marked as active",
     "snackbar.stripInactive": "Strip {{id}} marked as inactive",
@@ -117,10 +117,10 @@ const translations: Record<Language, Record<string, string>> = {
     "common.2dMode": "2D Mode",
     "common.centerCamera": "Center Camera",
     "common.confirm": "Confirm",
-    "common.confirmDeletion": "Confirm Deletion",
+    "common.confirmDeletion": "Confirm Archive",
     "common.confirmStatusChange": "Confirm Status Change",
     "common.deleteConfirmMessage":
-      "Are you sure you want to delete flight strip {{id}}? This action cannot be undone.",
+      "Are you sure you want to archive flight strip {{id}}? This action can be undone by restoring the strip.",
     "common.statusChangeMessage":
       "Are you sure you want to mark this flight strip as {{status}}?",
     "common.active": "active",
@@ -149,11 +149,11 @@ const translations: Record<Language, Record<string, string>> = {
     "sidebar.confirmButton": "Confirm",
     "sidebar.failAddStrip": "Failed to add flight strip",
     "sidebar.failUpdateStrip": "Failed to update flight strip",
-    "sidebar.failRemoveStrip": "Failed to remove strip {{name}}",
+    "sidebar.failRemoveStrip": "Failed to archive strip {{name}}",
     "sidebar.failLoadStrips": "Failed to load flight strips",
     "sidebar.stripMarkedAs": "Strip {{name}} marked as {{status}}",
     "sidebar.stripUpdated": "Strip {{name}} updated successfully",
-    "sidebar.stripRemoved": "Strip {{name}} has been removed",
+    "sidebar.stripRemoved": "Strip {{name}} has been archived",
 
     // Flight Strip Card
     "flightStrip.takeoff": "Takeoff",
@@ -214,15 +214,15 @@ const translations: Record<Language, Record<string, string>> = {
     // Dialogs
     "dialog.addStrip": "Adicionar Tira de Voo",
     "dialog.editStrip": "Editar Tira de Voo",
-    "dialog.confirmDelete": "Confirmar Exclusão",
-    "dialog.deleteMessage": "Tem certeza de que deseja excluir a tira de voo",
-    "dialog.deleteWarning": "Esta ação não pode ser desfeita.",
+    "dialog.confirmDelete": "Confirmar Arquivamento",
+    "dialog.deleteMessage": "Tem certeza de que deseja arquivar a tira de voo",
+    "dialog.deleteWarning": "Esta ação pode ser desfeita restaurando a tira.",
     "dialog.cancel": "Cancelar",
-    "dialog.delete": "Excluir",
+    "dialog.delete": "Arquivar",
 
     // Snackbar messages
     "snackbar.stripAdded": "Tira de voo adicionada",
-    "snackbar.stripRemoved": "Tira {{id}} foi removida",
+    "snackbar.stripRemoved": "Tira {{id}} foi arquivada",
     "snackbar.stripUpdated": "Tira {{id}} atualizada com sucesso",
     "snackbar.stripActive": "Tira {{id}} marcada como ativa",
     "snackbar.stripInactive": "Tira {{id}} marcada como inativa",
@@ -284,10 +284,10 @@ const translations: Record<Language, Record<string, string>> = {
     "common.2dMode": "Modo 2D",
     "common.centerCamera": "Centralizar Câmera",
     "common.confirm": "Confirmar",
-    "common.confirmDeletion": "Confirmar Exclusão",
+    "common.confirmDeletion": "Confirmar Arquivamento",
     "common.confirmStatusChange": "Confirmar Mudança de Status",
     "common.deleteConfirmMessage":
-      "Tem certeza de que deseja excluir a tira de voo {{id}}? Esta ação não pode ser desfeita.",
+      "Tem certeza de que deseja arquivar a tira de voo {{id}}? Esta ação pode ser desfeita restaurando a tira.",
     "common.statusChangeMessage":
       "Tem certeza de que deseja marcar esta tira de voo como {{status}}?",
     "common.active": "ativa",
@@ -316,11 +316,11 @@ const translations: Record<Language, Record<string, string>> = {
     "sidebar.confirmButton": "Confirmar",
     "sidebar.failAddStrip": "Falha ao adicionar tira de voo",
     "sidebar.failUpdateStrip": "Falha ao atualizar tira de voo",
-    "sidebar.failRemoveStrip": "Falha ao remover tira {{name}}",
+    "sidebar.failRemoveStrip": "Falha ao arquivar tira {{name}}",
     "sidebar.failLoadStrips": "Falha ao carregar tiras de voo",
     "sidebar.stripMarkedAs": "Tira {{name}} marcada como {{status}}",
     "sidebar.stripUpdated": "Tira {{name}} atualizada com sucesso",
-    "sidebar.stripRemoved": "Tira {{name}} foi removida",
+    "sidebar.stripRemoved": "Tira {{name}} foi arquivada",
 
     // Flight Strip Card
     "flightStrip.takeoff": "Decolagem",
