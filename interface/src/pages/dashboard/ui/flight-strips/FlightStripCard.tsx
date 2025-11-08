@@ -16,7 +16,7 @@ import {
   DialogActions,
   Button,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
+import ArchiveIcon from "@mui/icons-material/Archive";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
@@ -151,7 +151,7 @@ const FlightStripCard = ({
               className="remove-button"
               sx={{ opacity: 0, transition: "opacity 0.2s" }}
             >
-              <CloseIcon fontSize="small" />
+              <ArchiveIcon fontSize="small" />
             </IconButton>
           </Box>
         </Box>
