@@ -1,6 +1,6 @@
+import { useState, useRef, useEffect } from "react";
+import { Box, IconButton, Paper, Typography } from "@mui/material";
 import { Header } from "./Header";
-import { useState, useRef } from "react";
-import { Box, IconButton } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import MenuOpenIcon from "@mui/icons-material/MenuOpen";
 import { MapViewer } from "./MapViewer";
@@ -13,6 +13,44 @@ import {
   ResizablePanel,
   ResizableHandle,
 } from "@/shared/ui";
+
+const FloatingClock = () => {
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const zuluTime = currentTime.toISOString().substring(11, 19) + "Z";
+
+  return (
+    <Paper
+      elevation={3}
+      sx={{
+        position: "absolute",
+        bottom: 16,
+        left: "50%",
+        transform: "translateX(-50%)",
+        px: 3,
+        py: 1.5,
+        bgcolor: "background.paper",
+        border: 1,
+        borderColor: "divider",
+      }}
+    >
+      <Typography
+        variant="h5"
+        sx={{ fontFamily: "monospace", fontWeight: "bold" }}
+      >
+        {zuluTime}
+      </Typography>
+    </Paper>
+  );
+};
 
 export const DashboardPage = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -40,39 +78,15 @@ export const DashboardPage = () => {
               id="sidebar"
               ref={sidebarRef}
               defaultSize={20}
-              minSize={0}
+              minSize={20}
               maxSize={40}
-              collapsedSize={0}
               collapsible
-              onCollapse={() => setSidebarCollapsed(true)}
-              onExpand={() => setSidebarCollapsed(false)}
             >
               <SidebarPanel />
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel id="main" defaultSize={80} minSize={40}>
               <Box sx={{ height: "100%", position: "relative" }}>
-                <IconButton
-                  onClick={() => {
-                    if (sidebarCollapsed) {
-                      sidebarRef.current?.expand();
-                    } else {
-                      sidebarRef.current?.collapse();
-                    }
-                  }}
-                  sx={{
-                    position: "absolute",
-                    top: 8,
-                    left: 8,
-                    zIndex: 10,
-                    bgcolor: "background.paper",
-                    border: 1,
-                    borderColor: "divider",
-                    "&:hover": { bgcolor: "action.hover" },
-                  }}
-                >
-                  {sidebarCollapsed ? <MenuIcon /> : <MenuOpenIcon />}
-                </IconButton>
                 <Box
                   component="main"
                   sx={{
@@ -84,6 +98,7 @@ export const DashboardPage = () => {
                 >
                   <MapViewer />
                 </Box>
+                <FloatingClock />
               </Box>
             </ResizablePanel>
           </ResizablePanelGroup>

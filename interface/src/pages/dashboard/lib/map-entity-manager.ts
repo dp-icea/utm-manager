@@ -401,7 +401,7 @@ export class MapEntityManager {
           ),
           // Replace point with sphere
           ellipsoid: {
-            radii: new Cesium.Cartesian3(10, 10, 10), // Adjust radius as needed
+            radii: new Cesium.Cartesian3(20, 20, 20), // Adjust radius as needed
             material: ellipsoidColor,
           },
         });

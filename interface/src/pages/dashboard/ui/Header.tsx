@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { Cartesian3 } from "cesium";
 import { Map, Globe } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -30,16 +29,6 @@ export const Header = () => {
   const { sceneMode, setSceneMode, viewer } = useMap();
   const navigate = useNavigate();
   const { language, setLanguage, t } = useLanguage();
-
-  const [currentTime, setCurrentTime] = useState(new Date());
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
 
   const toggleSceneMode = () => {
     setSceneMode(
@@ -140,16 +129,6 @@ export const Header = () => {
             <MenuItem value="pt">{t("common.portuguese")}</MenuItem>
           </Select>
         </FormControl>
-        <Typography
-          variant="h6"
-          sx={{
-            fontWeight: "bold",
-            fontFamily: "monospace",
-            alignContent: "center",
-          }}
-        >
-          {currentTime.toLocaleTimeString("en-US", { hour12: false })}
-        </Typography>
       </Box>
     </header>
   );
