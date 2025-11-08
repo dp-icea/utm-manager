@@ -1,5 +1,5 @@
+import { useState, useEffect } from "react";
 import { Cartesian3 } from "cesium";
-import { useEffect } from "react";
 import { Map, Globe } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import IconBRUTM from "@/shared/assets/logo.svg";
@@ -31,10 +31,15 @@ export const Header = () => {
   const navigate = useNavigate();
   const { language, setLanguage, t } = useLanguage();
 
-  const handleLogout = () => {
-    logout();
-    navigate(ROUTES.LOGIN);
-  };
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   const toggleSceneMode = () => {
     setSceneMode(
@@ -135,14 +140,16 @@ export const Header = () => {
             <MenuItem value="pt">{t("common.portuguese")}</MenuItem>
           </Select>
         </FormControl>
-        <Button
-          variant="text"
-          startIcon={<LogoutIcon />}
-          onClick={handleLogout}
-          color="inherit"
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: "bold",
+            fontFamily: "monospace",
+            alignContent: "center",
+          }}
         >
-          {t("header.logout")}
-        </Button>
+          {currentTime.toLocaleTimeString("en-US", { hour12: false })}
+        </Typography>
       </Box>
     </header>
   );
