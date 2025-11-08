@@ -74,7 +74,7 @@ const AddFlightStripForm = ({
     e.preventDefault();
 
     const strip: FlightStripUI = {
-      name: id,
+      name: id.trim(),
       flightArea,
       ...(height && { height: Number(height) }),
       ...(takeoffSpace && { takeoffSpace }),
@@ -124,12 +124,7 @@ const AddFlightStripForm = ({
         onInputChange={(_, newInputValue) => setId(newInputValue)}
         disabled={!!editStrip}
         renderInput={(params) => (
-          <TextField
-            {...params}
-            label={t("common.id")}
-            size="small"
-            required
-          />
+          <TextField {...params} label={t("common.id")} size="small" required />
         )}
       />
 
