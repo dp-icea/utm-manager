@@ -67,11 +67,15 @@ async def create_flight_strip(
     "/{flight_strip_name}",
     response_model=FlightStripDeletedResponse,
     summary="Delete Flight Strip",
-    description="Soft delete a flight strip by its name (can be restored later)",
+    description=(
+        "Soft delete a flight strip by its name (can be restored later)"
+    ),
 )
 async def delete_flight_strip(
     flight_strip_name: str = Path(..., description="Flight strip name"),
-    deleted_by: Optional[str] = Query(None, description="Who is deleting the strip"),
+    deleted_by: Optional[str] = Query(
+        None, description="Who is deleting the strip"
+    ),
     use_case: FlightStripUseCase = Depends(get_flight_strip_use_case),
 ) -> FlightStripDeletedResponse:
     """Soft delete flight strip (can be restored later)"""
@@ -94,10 +98,12 @@ async def restore_flight_strip(
     """Restore a soft-deleted flight strip"""
 
     success = await use_case.restore_flight_strip(flight_strip_name)
-    
+
     # Get the restored flight strip to return it
-    restored_strip = await use_case.get_flight_strip_by_flight_name(flight_strip_name)
-    
+    restored_strip = await use_case.get_flight_strip_by_flight_name(
+        flight_strip_name
+    )
+
     return FlightStripResponse.from_domain(restored_strip)
 
 
@@ -134,6 +140,8 @@ async def update_flight_strip(
     update_fields = {
         k: v for k, v in request.model_dump().items() if v is not None
     }
+
+    print("Update fields:", update_fields)
 
     updated_strip = await use_case.update_flight_strip(
         flight_strip_name, **update_fields

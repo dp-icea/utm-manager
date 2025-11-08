@@ -83,15 +83,25 @@ export const SidebarPanel = () => {
     }),
   );
 
+  // Reusable function to fetch strips from backend
+  const fetchStrips = async () => {
+    try {
+      const strips = await FlightStripsService.listAll();
+      setStrips(strips);
+    } catch (error) {
+      console.error("Failed to fetch flight strips:", error);
+    }
+  };
+
   const handleAddStrip = async (strip: FlightStripUI) => {
     try {
       await FlightStripsService.create(strip);
-      setStrips([...strips, strip]);
       setSnackbar({
         open: true,
         message: t("snackbar.stripAdded"),
       });
       setAddDialogOpen(false);
+      await fetchStrips(); // Refresh strips after adding
     } catch (error) {
       setSnackbar({ open: true, message: t("sidebar.failAddStrip") });
     }
@@ -113,9 +123,6 @@ export const SidebarPanel = () => {
       if (stripToToggle) {
         const updatedStrip = { ...stripToToggle, active: pendingActiveState };
         await FlightStripsService.update(updatedStrip);
-        setStrips(
-          strips.map((s) => (s.name === updatedStrip.name ? updatedStrip : s)),
-        );
         setSnackbar({
           open: true,
           message: t("sidebar.stripMarkedAs", {
@@ -125,6 +132,7 @@ export const SidebarPanel = () => {
         });
         setActiveDialogOpen(false);
         setStripToToggle(null);
+        await fetchStrips(); // Refresh strips after toggling
       }
     } catch (error) {
       console.error("Failed to update flight strip status:", error);
@@ -136,10 +144,10 @@ export const SidebarPanel = () => {
     try {
       if (name) {
         await FlightStripsService.delete(name);
-        setStrips(strips.filter((s) => s.name !== name));
         setSnackbar({ open: true, message: t("sidebar.stripRemoved", { name }) });
         setDeleteDialogOpen(false);
         setStripToDelete(null);
+        await fetchStrips(); // Refresh strips after deleting
       }
     } catch (error) {
       console.error("Failed to remove flight strip:", error);
@@ -155,15 +163,13 @@ export const SidebarPanel = () => {
   const handleUpdateStrip = async (updatedStrip: FlightStripUI) => {
     try {
       await FlightStripsService.update(updatedStrip);
-      setStrips(
-        strips.map((s) => (s.name === editingStrip?.name ? updatedStrip : s)),
-      );
       setSnackbar({
         open: true,
         message: t("sidebar.stripUpdated", { name: updatedStrip.name }),
       });
       setEditDialogOpen(false);
       setEditingStrip(null);
+      await fetchStrips(); // Refresh strips after updating
     } catch (error) {
       console.error("Failed to update flight strip:", error);
       setSnackbar({ open: true, message: t("sidebar.failUpdateStrip") });
@@ -267,13 +273,12 @@ export const SidebarPanel = () => {
     }
   };
 
+  // Initial fetch and polling setup
   useEffect(() => {
-    const fetchStrips = async () => {
+    const initialFetch = async () => {
       try {
         setLoading(true);
-        const strips = await FlightStripsService.listAll();
-        console.log("+++ There it is the strips +++");
-        setStrips(strips);
+        await fetchStrips();
       } catch (error) {
         console.error("Failed to fetch flight strips:", error);
         setSnackbar({ open: true, message: t("sidebar.failLoadStrips") });
@@ -282,7 +287,15 @@ export const SidebarPanel = () => {
       }
     };
 
-    fetchStrips();
+    initialFetch();
+
+    // Set up polling every 5 seconds
+    const intervalId = setInterval(() => {
+      fetchStrips();
+    }, 5000);
+
+    // Cleanup interval on unmount
+    return () => clearInterval(intervalId);
   }, []);
 
   useEffect(onRegionSelectOnViewer, [activeStripIds]);
