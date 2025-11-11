@@ -99,7 +99,7 @@ class FlightStripMongoDBAdapter(FlightStripRepositoryPort):
         """Retrieve flight strip by flight name (excludes soft-deleted by default)"""
         try:
             doc = await self.collection.find_one(
-                {"name": flight_name, "is_deleted": {"$ne": True}}
+                {"name": flight_name, "is_deleted": {"$eq": False}}
             )
             return self._from_document(doc) if doc else None
         except Exception as e:
@@ -119,7 +119,7 @@ class FlightStripMongoDBAdapter(FlightStripRepositoryPort):
             doc = self._to_document(flight_strip)
 
             result = await self.collection.replace_one(
-                {"name": flight_strip.name}, doc
+                {"name": flight_strip.name, "is_deleted": {"$eq": False}}, doc
             )
 
             if result.matched_count == 0:
@@ -240,14 +240,15 @@ class FlightStripMongoDBAdapter(FlightStripRepositoryPort):
         try:
             # Check if flight strip exists and is not already deleted
             existing = await self.collection.find_one(
-                {"name": flight_strip_name, "is_deleted": {"$ne": True}}
+                {"name": flight_strip_name, "is_deleted": {"$eq": False}}
             )
+
             if not existing:
                 return False
 
             # Mark as deleted
             result = await self.collection.update_one(
-                {"name": flight_strip_name, "is_deleted": {"$ne": True}},
+                {"name": flight_strip_name, "is_deleted": {"$eq": False}},
                 {
                     "$set": {
                         "is_deleted": True,

@@ -3,6 +3,7 @@
 from typing import List, Optional
 from datetime import datetime
 import logging
+import json
 
 from domain.flight_strip import FlightStrip
 from schemas.requests.flight_strip import FlightArea
@@ -155,7 +156,9 @@ class FlightStripUseCase:
                 details=str(e),
             )
 
-    async def delete_flight_strip(self, flight_strip_name: str, deleted_by: Optional[str] = None) -> bool:
+    async def delete_flight_strip(
+        self, flight_strip_name: str, deleted_by: Optional[str] = None
+    ) -> bool:
         """Delete flight strip (soft delete - can be restored later)"""
         try:
             # Check if flight strip exists
@@ -166,16 +169,20 @@ class FlightStripUseCase:
                 raise ApiException(
                     status_code=HTTPStatus.NOT_FOUND,
                     message=(
-                        f"Flight strip with name '{flight_strip_name}' not found"
+                        f"Flight strip with name '{flight_strip_name}' not"
+                        " found"
                     ),
                 )
 
-            success = await self.repository.soft_delete(flight_strip_name, deleted_by)
+            success = await self.repository.soft_delete(
+                flight_strip_name, deleted_by
+            )
 
             if success:
                 logging.info(
                     f"Deleted flight strip: {existing.name} from"
-                    f" {existing.flight_area} area by {deleted_by or 'unknown'}"
+                    f" {existing.flight_area} area by"
+                    f" {deleted_by or 'unknown'}"
                 )
 
             return success
@@ -198,12 +205,13 @@ class FlightStripUseCase:
             # Check if flight strip exists (including soft-deleted ones)
             collection = self.repository.collection
             existing = await collection.find_one({"name": flight_strip_name})
-            
+
             if not existing:
                 raise ApiException(
                     status_code=HTTPStatus.NOT_FOUND,
                     message=(
-                        f"Flight strip with name '{flight_strip_name}' not found"
+                        f"Flight strip with name '{flight_strip_name}' not"
+                        " found"
                     ),
                 )
 
@@ -220,7 +228,8 @@ class FlightStripUseCase:
             raise
         except Exception as e:
             logging.error(
-                f"Error permanently deleting flight strip {flight_strip_name}: {e}"
+                "Error permanently deleting flight strip"
+                f" {flight_strip_name}: {e}"
             )
             raise ApiException(
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
@@ -237,7 +246,8 @@ class FlightStripUseCase:
                 raise ApiException(
                     status_code=HTTPStatus.NOT_FOUND,
                     message=(
-                        f"Deleted flight strip with name '{flight_strip_name}' not found"
+                        f"Deleted flight strip with name '{flight_strip_name}'"
+                        " not found"
                     ),
                 )
 
@@ -273,11 +283,11 @@ class FlightStripUseCase:
         try:
             deleted_count = await self.repository.count_deleted()
             active_count = len(await self.repository.list_all())
-            
+
             return {
                 "active_strips": active_count,
                 "deleted_strips": deleted_count,
-                "total_strips": active_count + deleted_count
+                "total_strips": active_count + deleted_count,
             }
         except Exception as e:
             logging.error(f"Error getting deletion statistics: {e}")

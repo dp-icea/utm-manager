@@ -1,5 +1,4 @@
 import { Cartesian3 } from "cesium";
-import { useEffect } from "react";
 import { Map, Globe } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import IconBRUTM from "@/shared/assets/logo.svg";
@@ -30,11 +29,6 @@ export const Header = () => {
   const { sceneMode, setSceneMode, viewer } = useMap();
   const navigate = useNavigate();
   const { language, setLanguage, t } = useLanguage();
-
-  const handleLogout = () => {
-    logout();
-    navigate(ROUTES.LOGIN);
-  };
 
   const toggleSceneMode = () => {
     setSceneMode(
@@ -135,14 +129,6 @@ export const Header = () => {
             <MenuItem value="pt">{t("common.portuguese")}</MenuItem>
           </Select>
         </FormControl>
-        <Button
-          variant="text"
-          startIcon={<LogoutIcon />}
-          onClick={handleLogout}
-          color="inherit"
-        >
-          {t("header.logout")}
-        </Button>
       </Box>
     </header>
   );

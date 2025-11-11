@@ -347,6 +347,15 @@ export class MapEntityManager {
         }
       }
 
+      for (let mapping of this.droneMappings) {
+        if (mapping.serialNumber === droneId || mapping.sisant === droneId) {
+          if (ellipsoidColor === Cesium.Color.RED) {
+            ellipsoidColor = Cesium.Color.BLACK;
+            break;
+          }
+        }
+      }
+
       if (this.flights[id]) {
         const entity = this.flights[id][0];
         entity.position = Cesium.Cartesian3.fromDegrees(
@@ -392,7 +401,7 @@ export class MapEntityManager {
           ),
           // Replace point with sphere
           ellipsoid: {
-            radii: new Cesium.Cartesian3(10, 10, 10), // Adjust radius as needed
+            radii: new Cesium.Cartesian3(20, 20, 20), // Adjust radius as needed
             material: ellipsoidColor,
           },
         });
@@ -651,6 +660,52 @@ export class MapEntityManager {
       east: -46.693198433969286,
       south: -23.70465991914122,
       west: -46.7009636313889,
+    };
+
+    return ret;
+  };
+
+  getFirstQuarterViewRectangle = (): Rectangle => {
+    const ret: Rectangle = {
+      north: -23.720044622651,
+      east: -46.71157502788901,
+      south: -23.699090950265614,
+      west: -46.696095304503416,
+    };
+
+    return ret;
+  };
+
+  getSecondQuarterViewRectangle = (): Rectangle => {
+    const ret: Rectangle = {
+      north: -23.720044622651,
+      east: -46.696095304503416,
+      south: -23.699090950265614,
+      west: -46.680615581111782,
+    };
+
+    return ret;
+  };
+
+  // Bottom-left quadrant
+  getThirdQuarterViewRectangle = (): Rectangle => {
+    const ret: Rectangle = {
+      north: -23.699090950265614,
+      east: -46.71157502788901,
+      south: -23.678137277880225,
+      west: -46.696095304503416,
+    };
+
+    return ret;
+  };
+
+  // Bottom-right quadrant
+  getFourthQuarterViewRectangle = (): Rectangle => {
+    const ret: Rectangle = {
+      north: -23.699090950265614,
+      east: -46.696095304503416,
+      south: -23.678137277880225,
+      west: -46.680615581111782,
     };
 
     return ret;
