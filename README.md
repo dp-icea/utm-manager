@@ -10,7 +10,7 @@ A specialized airspace management interface developed as part of the BR-UTM (Bra
 
 ### Video Demo
 
-[Screencast from 08-10-2025 16:22:45.webm](https://github.com/user-attachments/assets/6fde223d-35b0-4612-85aa-71f77e7ed95b)
+[output.webm](https://github.com/user-attachments/assets/a1832c0b-138c-4920-9d9a-d227e9792e8d)
 
 ## Overview
 
